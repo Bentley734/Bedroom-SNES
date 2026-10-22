@@ -16,6 +16,7 @@ def ident(n): return '_js_'+n if n in KEYWORDS else n
 def field(n):return '['+json.dumps(n)+']'
 
 class Port:
+    MULTI_LOCALS={"colLay":3,"secondLay":3,"adrs":2,"eff":2}
     TYPES={}
     BOOL_FIELDS=set()
     BOOL_LOCALS=set()
@@ -73,8 +74,8 @@ class Port:
         if t=='Identifier':return 'nil' if n['name']=='undefined' else ident(n['name'])
         if t=='ThisExpression':return 'self'
         if t=='MemberExpression':
-            if n['computed'] and n['object']['type']=='Identifier' and n['object']['name'] in ['colLay','secondLay']:
-                assert n['property']['type']=='Literal' and n['property']['value'] in [0,1,2]
+            if n['computed'] and n['object']['type']=='Identifier' and n['object']['name'] in self.MULTI_LOCALS:
+                assert n['property']['type']=='Literal' and n['property']['value'] in range(self.MULTI_LOCALS[n['object']['name']])
                 return n['object']['name']+str(n['property']['value'])
             return self.expr(n['object'])+('['+self.expr(n['property'])+']' if n['computed'] else field(n['property']['name']))
         if t=='ArrayExpression':return '{length = '+str(len(n['elements']))+', '+', '.join('['+str(i)+'] = '+self.expr(v) for i,v in enumerate(n['elements']) if v)+'}'
@@ -134,13 +135,13 @@ class Port:
         raise ValueError('Unsupported expression '+t)
     def indent(self,s):return '\n'.join('  '+x for x in s.splitlines())
     def assignment(self,n):
-        if n['left']['type']=='MemberExpression' and not n['left']['computed'] and n['left']['property']['name']=='getColor':
+        if n['left']['type']=='MemberExpression' and not n['left']['computed'] and n['left']['property']['name'] in ['getColor','getAdr']:
             previous=self.multi_return;self.multi_return=True
             value=self.expr(n['right']);self.multi_return=previous
             return self.expr(n['left'])+' = '+value
-        if n['left']['type']=='Identifier' and n['left']['name'] in ['colLay','secondLay']:
+        if n['left']['type']=='Identifier' and n['left']['name'] in self.MULTI_LOCALS:
             name=n['left']['name'];assert n['operator']=='='
-            return ', '.join(name+str(i) for i in range(3))+' = '+self.expr(n['right'])
+            return ', '.join(name+str(i) for i in range(self.MULTI_LOCALS[name]))+' = '+self.expr(n['right'])
         a,b=self.expr(n['left']),self.expr(n['right']);op=n['operator']
         if op=='=':return a+' = '+self.wrap(n['left'],b)
         if op=='+=' and (n['left'].get('name')=='str' or n['right']['type']=='Literal' and isinstance(n['right'].get('value'),str)):return a+' = _add('+a+', '+b+')'
@@ -160,9 +161,9 @@ class Port:
             rows=[]
             for d in n['declarations']:
                 name=d['id']['name'];init=d.get('init')
-                if name in ['colLay','secondLay']:
+                if name in self.MULTI_LOCALS:
                     value=', '.join(self.expr(v) for v in init['elements']) if init['type']=='ArrayExpression' else self.expr(init)
-                    rows.append('local '+', '.join(name+str(i) for i in range(3))+' = '+value)
+                    rows.append('local '+', '.join(name+str(i) for i in range(self.MULTI_LOCALS[name]))+' = '+value)
                 else:rows.append('local '+ident(name)+' = '+(self.expr(init) if init else 'nil'))
             return '\n'.join(rows)
         if t=='FunctionDeclaration':

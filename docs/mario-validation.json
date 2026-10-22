@@ -1,0 +1,575 @@
+{
+  "version": "0.2.0",
+  "nativeEnvironment": "Windows x64, native Love 11.x and Gen1Recomp 0.3.95 production sandbox",
+  "games": {
+    "smw": {
+      "title": "Super Mario World (USA)",
+      "referenceCheckpoints": 21,
+      "lastReferenceFrame": 2741,
+      "checkpointMatches": true,
+      "native": {
+        "cartridge": "SUPER MARIOWORLD",
+        "preloadSkippedVideo": true,
+        "benchmark": [
+          {
+            "name": "level_idle",
+            "frames": 600,
+            "pc": 36923,
+            "seconds": 9.027973800000005,
+            "spcPc": 1430,
+            "fps": 66.4600953981501,
+            "processingP95Ms": 20.720399999998307,
+            "ppuMode": 1,
+            "includes": "Console frame, audio sampling/queue, texture upload and draw; uncapped, no display synchronization",
+            "pixelSha256": "3b01645d106b7c55865d022a68b2d391d1396b8759b2ea4a575ce1e5d6dd4078",
+            "audioPeak": 0.1173095703125,
+            "processingMaxMs": 32.86999999999907,
+            "frame": 2651
+          },
+          {
+            "name": "walk",
+            "frames": 60,
+            "pc": 36565,
+            "seconds": 0.8316159000000027,
+            "spcPc": 1356,
+            "fps": 72.1486926837255,
+            "processingP95Ms": 19.212199999998347,
+            "ppuMode": 1,
+            "includes": "Console frame, audio sampling/queue, texture upload and draw; uncapped, no display synchronization",
+            "pixelSha256": "9aab53179a6ad0a2f50858a00dfc905e97e90b4cd8b49aa85f8da1ee3563a5c0",
+            "audioPeak": 0.128753662109375,
+            "processingMaxMs": 19.791099999999062,
+            "frame": 2711
+          },
+          {
+            "name": "jump",
+            "frames": 30,
+            "pc": 36637,
+            "seconds": 0.4213009999999997,
+            "spcPc": 1430,
+            "fps": 71.20799618325145,
+            "processingP95Ms": 19.83330000000194,
+            "ppuMode": 1,
+            "includes": "Console frame, audio sampling/queue, texture upload and draw; uncapped, no display synchronization",
+            "pixelSha256": "8df8629dedd95237e59fe329a5ab055113f3d841428b77960403045e610169a8",
+            "audioPeak": 0.24151611328125,
+            "processingMaxMs": 19.975200000004634,
+            "frame": 2741
+          }
+        ],
+        "warmupFrames": 1,
+        "checkpoint": {
+          "ppuMode": 1,
+          "pc": 36921,
+          "pixelSha256": "d687cd6331a0674a7224e0e0f6b44329a3a4b97f0c638cf0a7a0eaac5d06e128",
+          "spcPc": 1441,
+          "frame": 2051
+        },
+        "exit": true,
+        "paced": {
+          "frame": 2951,
+          "frames": 900,
+          "pc": 36543,
+          "seconds": 15.000599200000003,
+          "spcPc": 3275,
+          "fps": 59.99760329574033,
+          "processingP95Ms": 17.551499999996167,
+          "ppuMode": 1,
+          "includes": "Wall-paced 60 Hz core.update hook, native FixedStep, Screen:update, audio/video/draw and sleeps",
+          "pixelSha256": "4847b494629767339c7f6756853f13a8037bd413e5d1a14e639a73e3c6d03090",
+          "hostTicks": 900,
+          "processingMaxMs": 20.805899999999156
+        }
+      },
+      "reference": [
+        {
+          "stage": "title",
+          "frameNumber": 360,
+          "pc": 51862,
+          "spcPc": 1635,
+          "audioPeak": 0.237823486328125,
+          "pixelSha256": "9971248018403bee0c42dc727b34f000fdc6a02a6a8ae89dcb5784a8398a02f5",
+          "frames": 360
+        },
+        {
+          "stage": "start",
+          "frameNumber": 362,
+          "pc": 40406,
+          "spcPc": 4803,
+          "audioPeak": 0.112396240234375,
+          "pixelSha256": "30a816ed1fcce7cc4da27e6af59d0020caebeeefb63f421c0396d5177e54a8ef",
+          "frames": 2
+        },
+        {
+          "stage": "file",
+          "frameNumber": 452,
+          "pc": 32877,
+          "spcPc": 3333,
+          "audioPeak": 0.2371826171875,
+          "pixelSha256": "28bc5585235f9d1201ba52af0e8c9ae2427dc3ce589efbf5b805460280ec868f",
+          "frames": 90
+        },
+        {
+          "stage": "select_file",
+          "frameNumber": 454,
+          "pc": 32875,
+          "spcPc": 4403,
+          "audioPeak": 0.161651611328125,
+          "pixelSha256": "28bc5585235f9d1201ba52af0e8c9ae2427dc3ce589efbf5b805460280ec868f",
+          "frames": 2
+        },
+        {
+          "stage": "players",
+          "frameNumber": 514,
+          "pc": 32875,
+          "spcPc": 1353,
+          "audioPeak": 0.175750732421875,
+          "pixelSha256": "9efd0c61f63a2724cc65921a054264d8aeef63582395c3b9491fd6c1d0d6fe2b",
+          "frames": 60
+        },
+        {
+          "stage": "one_player",
+          "frameNumber": 516,
+          "pc": 56702,
+          "spcPc": 1356,
+          "audioPeak": 0.081878662109375,
+          "pixelSha256": "90da34035b94f83f19d6982e3d05d22d068ede34dbc0f325d219789ac2b79abc",
+          "frames": 2
+        },
+        {
+          "stage": "intro",
+          "frameNumber": 696,
+          "pc": 32877,
+          "spcPc": 1387,
+          "audioPeak": 0.1982421875,
+          "pixelSha256": "b7a249417ea75e36ae9cd501122d513ca26e72694f7dc4219ec21d618f206a7d",
+          "frames": 180
+        },
+        {
+          "stage": "intro_wait",
+          "frameNumber": 1296,
+          "pc": 32875,
+          "spcPc": 1638,
+          "audioPeak": 0.173980712890625,
+          "pixelSha256": "95c889de4f1e2e864c01813bafe2578d827be98e83aa06edaa2cde384b18fb38",
+          "frames": 600
+        },
+        {
+          "stage": "overworld_wait",
+          "frameNumber": 1476,
+          "pc": 32875,
+          "spcPc": 1353,
+          "audioPeak": 0.05938720703125,
+          "pixelSha256": "95c889de4f1e2e864c01813bafe2578d827be98e83aa06edaa2cde384b18fb38",
+          "frames": 180
+        },
+        {
+          "stage": "left",
+          "frameNumber": 1506,
+          "pc": 32875,
+          "spcPc": 1356,
+          "audioPeak": 0,
+          "pixelSha256": "95c889de4f1e2e864c01813bafe2578d827be98e83aa06edaa2cde384b18fb38",
+          "frames": 30
+        },
+        {
+          "stage": "level_select",
+          "frameNumber": 1508,
+          "pc": 32875,
+          "spcPc": 1356,
+          "audioPeak": 0,
+          "pixelSha256": "95c889de4f1e2e864c01813bafe2578d827be98e83aa06edaa2cde384b18fb38",
+          "frames": 2
+        },
+        {
+          "stage": "level_wait",
+          "frameNumber": 1688,
+          "pc": 32974,
+          "spcPc": 1356,
+          "audioPeak": 0.120361328125,
+          "pixelSha256": "16f417596b15d8734ff11d350f60ea9c382e9173b949c67935f39e758f195280",
+          "frames": 180
+        },
+        {
+          "stage": "walk",
+          "frameNumber": 1748,
+          "pc": 32965,
+          "spcPc": 1353,
+          "audioPeak": 0.131927490234375,
+          "pixelSha256": "73ca62b347a0902ff6405a2b9ffb9d30cb4d346880500a81b54b36ca50743900",
+          "frames": 60
+        },
+        {
+          "stage": "jump",
+          "frameNumber": 1778,
+          "pc": 32965,
+          "spcPc": 4419,
+          "audioPeak": 0.138214111328125,
+          "pixelSha256": "2ebf61f1986358f2abf5a189c1334fa7a6157534134f86d6972b3bb2532d0315",
+          "frames": 30
+        },
+        {
+          "stage": "release",
+          "frameNumber": 1868,
+          "pc": 32974,
+          "spcPc": 1463,
+          "audioPeak": 0.159271240234375,
+          "pixelSha256": "5861094ce440d91c81b07def22a37484de2701d67eacf5a337e07f0a04d00fc6",
+          "frames": 90
+        },
+        {
+          "stage": "enter_level",
+          "frameNumber": 1870,
+          "pc": 32877,
+          "spcPc": 1353,
+          "audioPeak": 0.106658935546875,
+          "pixelSha256": "1aca6a18b6c0339370111ec64f1811cd0c4bd2c869de9e1dfb5b4d00cc11a434",
+          "frames": 2
+        },
+        {
+          "stage": "level_start",
+          "frameNumber": 2050,
+          "pc": 36891,
+          "spcPc": 1353,
+          "audioPeak": 0.1241455078125,
+          "pixelSha256": "d687cd6331a0674a7224e0e0f6b44329a3a4b97f0c638cf0a7a0eaac5d06e128",
+          "frames": 180
+        },
+        {
+          "stage": "native_warmup",
+          "frameNumber": 2051,
+          "pc": 36921,
+          "spcPc": 1441,
+          "audioPeak": 0.04376220703125,
+          "pixelSha256": "d687cd6331a0674a7224e0e0f6b44329a3a4b97f0c638cf0a7a0eaac5d06e128",
+          "frames": 1
+        },
+        {
+          "stage": "native_idle",
+          "frameNumber": 2651,
+          "pc": 36923,
+          "spcPc": 1430,
+          "audioPeak": 0.1173095703125,
+          "pixelSha256": "3b01645d106b7c55865d022a68b2d391d1396b8759b2ea4a575ce1e5d6dd4078",
+          "frames": 600
+        },
+        {
+          "stage": "native_walk",
+          "frameNumber": 2711,
+          "pc": 36565,
+          "spcPc": 1356,
+          "audioPeak": 0.128753662109375,
+          "pixelSha256": "9aab53179a6ad0a2f50858a00dfc905e97e90b4cd8b49aa85f8da1ee3563a5c0",
+          "frames": 60
+        },
+        {
+          "stage": "native_jump",
+          "frameNumber": 2741,
+          "pc": 36637,
+          "spcPc": 1430,
+          "audioPeak": 0.24151611328125,
+          "pixelSha256": "8df8629dedd95237e59fe329a5ab055113f3d841428b77960403045e610169a8",
+          "frames": 30
+        }
+      ]
+    },
+    "allstars": {
+      "title": "Super Mario All-Stars (USA)",
+      "referenceCheckpoints": 23,
+      "lastReferenceFrame": 2743,
+      "checkpointMatches": true,
+      "native": {
+        "cartridge": "SUPER MARIO ALL_STARS",
+        "preloadSkippedVideo": true,
+        "benchmark": [
+          {
+            "ppuMode": 1,
+            "pixelSha256": "1bba1e7ae765318aa913f1cd61665eb8ac2aba098f62bfd88b135d76f521870e",
+            "frames": 600,
+            "frame": 2653,
+            "processingMaxMs": 23.70069999999913,
+            "audioPeak": 0.49090576171875,
+            "name": "level_idle",
+            "seconds": 9.0598928,
+            "pc": 58214,
+            "fps": 66.2259491635486,
+            "processingP95Ms": 21.089199999998698,
+            "spcPc": 5355,
+            "includes": "Console frame, audio sampling/queue, texture upload and draw; uncapped, no display synchronization"
+          },
+          {
+            "ppuMode": 1,
+            "pixelSha256": "b4d2b6949c95c2e3586d1dacbbada06a8908747a7c029fb85867d06c7ce7ce88",
+            "frames": 60,
+            "frame": 2713,
+            "processingMaxMs": 22.360399999996616,
+            "audioPeak": 0.17962646484375,
+            "name": "walk",
+            "seconds": 0.9255973999999938,
+            "pc": 58143,
+            "fps": 64.82299971888469,
+            "processingP95Ms": 20.53899999999942,
+            "spcPc": 1407,
+            "includes": "Console frame, audio sampling/queue, texture upload and draw; uncapped, no display synchronization"
+          },
+          {
+            "ppuMode": 1,
+            "pixelSha256": "d7f9acbd8663809280c8e2981cd388d9583bd31f3b55b4a9395b35a5126e0e4c",
+            "frames": 30,
+            "frame": 2743,
+            "processingMaxMs": 23.1550000000027,
+            "audioPeak": 0.250457763671875,
+            "name": "jump",
+            "seconds": 0.4615703999999994,
+            "pc": 58202,
+            "fps": 64.99550231124014,
+            "processingP95Ms": 21.10309999999771,
+            "spcPc": 1462,
+            "includes": "Console frame, audio sampling/queue, texture upload and draw; uncapped, no display synchronization"
+          }
+        ],
+        "warmupFrames": 1,
+        "checkpoint": {
+          "ppuMode": 1,
+          "pc": 33193,
+          "pixelSha256": "60b450620e5cf6532ef6b88f3a465c773bcdb003b55ba403fc6d39954ac18771",
+          "spcPc": 1533,
+          "frame": 2053
+        },
+        "exit": true,
+        "paced": {
+          "ppuMode": 1,
+          "pixelSha256": "6fe853314a6a7fff60ffadad97d7de49cbba779be97652999ec4ef892c11632c",
+          "seconds": 15.008018,
+          "processingMaxMs": 23.07449999999278,
+          "hostTicks": 900,
+          "frame": 2929,
+          "frames": 876,
+          "pc": 33198,
+          "fps": 58.36879993081032,
+          "processingP95Ms": 19.591300000001866,
+          "spcPc": 1389,
+          "includes": "Wall-paced 60 Hz core.update hook, native FixedStep, Screen:update, audio/video/draw and sleeps"
+        }
+      },
+      "reference": [
+        {
+          "stage": "title",
+          "frameNumber": 600,
+          "pc": 41311,
+          "spcPc": 1499,
+          "audioPeak": 0.18975830078125,
+          "pixelSha256": "c28205bbcb345ee9c3fdfe87f88ce4e7cbbcac4462891aee7bd69ea621044814",
+          "frames": 600
+        },
+        {
+          "stage": "start",
+          "frameNumber": 602,
+          "pc": 41305,
+          "spcPc": 1353,
+          "audioPeak": 0.086334228515625,
+          "pixelSha256": "c28205bbcb345ee9c3fdfe87f88ce4e7cbbcac4462891aee7bd69ea621044814",
+          "frames": 2
+        },
+        {
+          "stage": "game_select",
+          "frameNumber": 782,
+          "pc": 35792,
+          "spcPc": 4074,
+          "audioPeak": 0.140411376953125,
+          "pixelSha256": "0cc5f11e4d6807acffd5f9167d709d2bf1e91700460cdc33161486ce3ccc22d9",
+          "frames": 180
+        },
+        {
+          "stage": "select_smb1",
+          "frameNumber": 784,
+          "pc": 35794,
+          "spcPc": 4085,
+          "audioPeak": 0,
+          "pixelSha256": "0cc5f11e4d6807acffd5f9167d709d2bf1e91700460cdc33161486ce3ccc22d9",
+          "frames": 2
+        },
+        {
+          "stage": "wait_file",
+          "frameNumber": 964,
+          "pc": 32896,
+          "spcPc": 1401,
+          "audioPeak": 0.30242919921875,
+          "pixelSha256": "387340e3a08ba972521e8f2ac43520810e2ad592dae56c442c66081416044986",
+          "frames": 180
+        },
+        {
+          "stage": "select_file",
+          "frameNumber": 966,
+          "pc": 32893,
+          "spcPc": 3258,
+          "audioPeak": 0.084991455078125,
+          "pixelSha256": "387340e3a08ba972521e8f2ac43520810e2ad592dae56c442c66081416044986",
+          "frames": 2
+        },
+        {
+          "stage": "wait_start",
+          "frameNumber": 1146,
+          "pc": 32893,
+          "spcPc": 3846,
+          "audioPeak": 0.292816162109375,
+          "pixelSha256": "387340e3a08ba972521e8f2ac43520810e2ad592dae56c442c66081416044986",
+          "frames": 180
+        },
+        {
+          "stage": "start_game",
+          "frameNumber": 1148,
+          "pc": 32896,
+          "spcPc": 3826,
+          "audioPeak": 0.072784423828125,
+          "pixelSha256": "387340e3a08ba972521e8f2ac43520810e2ad592dae56c442c66081416044986",
+          "frames": 2
+        },
+        {
+          "stage": "level",
+          "frameNumber": 1328,
+          "pc": 32893,
+          "spcPc": 1401,
+          "audioPeak": 0.302001953125,
+          "pixelSha256": "45d5dee2e37a8169a133d9d51b9694d41a187a74458966adf6103d134bf4dd0f",
+          "frames": 180
+        },
+        {
+          "stage": "walk",
+          "frameNumber": 1388,
+          "pc": 32893,
+          "spcPc": 1490,
+          "audioPeak": 0.34783935546875,
+          "pixelSha256": "45d5dee2e37a8169a133d9d51b9694d41a187a74458966adf6103d134bf4dd0f",
+          "frames": 60
+        },
+        {
+          "stage": "jump",
+          "frameNumber": 1418,
+          "pc": 32893,
+          "spcPc": 1398,
+          "audioPeak": 0.303955078125,
+          "pixelSha256": "45d5dee2e37a8169a133d9d51b9694d41a187a74458966adf6103d134bf4dd0f",
+          "frames": 30
+        },
+        {
+          "stage": "release",
+          "frameNumber": 1478,
+          "pc": 32893,
+          "spcPc": 1490,
+          "audioPeak": 0.29510498046875,
+          "pixelSha256": "45d5dee2e37a8169a133d9d51b9694d41a187a74458966adf6103d134bf4dd0f",
+          "frames": 60
+        },
+        {
+          "stage": "start_file",
+          "frameNumber": 1480,
+          "pc": 32893,
+          "spcPc": 3796,
+          "audioPeak": 0.06561279296875,
+          "pixelSha256": "45d5dee2e37a8169a133d9d51b9694d41a187a74458966adf6103d134bf4dd0f",
+          "frames": 2
+        },
+        {
+          "stage": "wait_game",
+          "frameNumber": 1720,
+          "pc": 60310,
+          "spcPc": 3256,
+          "audioPeak": 0.251495361328125,
+          "pixelSha256": "01dc76f0fd544fba7e0fa4b290723ca894c76061c86560408b9f8226d7fae2c5",
+          "frames": 240
+        },
+        {
+          "stage": "move",
+          "frameNumber": 1780,
+          "pc": 34306,
+          "spcPc": 1353,
+          "audioPeak": 0.248077392578125,
+          "pixelSha256": "784f9183b062be7e6943db6415129e4e9d557934fbbf1f2a04493cb1d69ef9aa",
+          "frames": 60
+        },
+        {
+          "stage": "jump_in_game",
+          "frameNumber": 1810,
+          "pc": 59956,
+          "spcPc": 1786,
+          "audioPeak": 0.124053955078125,
+          "pixelSha256": "99e673280c30ace42c34edfae0c59d01653afffd4dbc598b42e5ed69143aad72",
+          "frames": 30
+        },
+        {
+          "stage": "release2",
+          "frameNumber": 1870,
+          "pc": 59956,
+          "spcPc": 1433,
+          "audioPeak": 0.2215576171875,
+          "pixelSha256": "72e430d347ac287f8719c5cb04a124531091fc188005fab56448f228692a007e",
+          "frames": 60
+        },
+        {
+          "stage": "start_smb1",
+          "frameNumber": 1872,
+          "pc": 40792,
+          "spcPc": 3754,
+          "audioPeak": 0.133575439453125,
+          "pixelSha256": "72e430d347ac287f8719c5cb04a124531091fc188005fab56448f228692a007e",
+          "frames": 2
+        },
+        {
+          "stage": "world1_1",
+          "frameNumber": 2052,
+          "pc": 33196,
+          "spcPc": 1398,
+          "audioPeak": 0.18682861328125,
+          "pixelSha256": "f37118962d1a713b6dab7a073e2696a263287eb965f37d793aee490fa3e13be0",
+          "frames": 180
+        },
+        {
+          "stage": "native_warmup",
+          "frameNumber": 2053,
+          "pc": 33193,
+          "spcPc": 1533,
+          "audioPeak": 0,
+          "pixelSha256": "60b450620e5cf6532ef6b88f3a465c773bcdb003b55ba403fc6d39954ac18771",
+          "frames": 1
+        },
+        {
+          "stage": "native_idle",
+          "frameNumber": 2653,
+          "pc": 58214,
+          "spcPc": 5355,
+          "audioPeak": 0.49090576171875,
+          "pixelSha256": "1bba1e7ae765318aa913f1cd61665eb8ac2aba098f62bfd88b135d76f521870e",
+          "frames": 600
+        },
+        {
+          "stage": "native_walk",
+          "frameNumber": 2713,
+          "pc": 58143,
+          "spcPc": 1407,
+          "audioPeak": 0.17962646484375,
+          "pixelSha256": "b4d2b6949c95c2e3586d1dacbbada06a8908747a7c029fb85867d06c7ce7ce88",
+          "frames": 60
+        },
+        {
+          "stage": "native_jump",
+          "frameNumber": 2743,
+          "pc": 58202,
+          "spcPc": 1462,
+          "audioPeak": 0.250457763671875,
+          "pixelSha256": "d7f9acbd8663809280c8e2981cd388d9583bd31f3b55b4a9395b35a5126e0e4c",
+          "frames": 30
+        }
+      ]
+    },
+    "yoshi": {
+      "title": "Super Mario World 2 - Yoshi's Island (USA) (Rev 1)",
+      "supported": false,
+      "reason": "Requires Super FX hardware, which this core does not emulate.",
+      "observedError": "This cartridge requires an unsupported enhancement chip (type 21)."
+    }
+  },
+  "zombiesReferenceCheckpoints": 18,
+  "romsBundled": false,
+  "limitations": "Short first-level tests, not full-game or hardware accuracy certification. Startup drawing skipped only in native performance probes; separate reference comparisons render every frame. Native canvas/draw/audio/update path tested, not a loaded Pokemon save or every display refresh mode. Inherits SnesJs missing DSP echo and approximate timing. Other platforms unverified."
+}

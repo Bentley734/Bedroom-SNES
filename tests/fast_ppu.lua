@@ -44,7 +44,7 @@ for trial=1,96 do
     array('tilemapAdr',i,rand(32)*1024);array('tileAdr',i,rand(8)*4096)
   end
   -- Also exercise explicit fallback paths.
-  both('addSub',trial%13==0);both('pseudoHires',trial%17==0)
+  both('addSub',trial%13==0);both('pseudoHires',trial%17==0);both('mosaicSize',trial%4+1)
   array('mosaicEnabled',0,trial%19==0);array('mainScreenWindow',1,trial%23==0)
   for _,line in ipairs({0,1,2,7,31,127,223,224,225}) do
     array('cgram',rand(256),rand(32768));array('vram',rand(32768),rand(65536))
@@ -60,3 +60,33 @@ for trial=1,96 do
   end
 end
 print('PASS: 864 batched/reference scanlines: multiple layers, sprites, large tiles, fixed-color math, raster changes and fallbacks')
+-- Every window logic, inverted/empty/full windows, color clipping, subscreen
+-- fallback to fixed color, and sprite palettes exempt from color math.
+for trial=1,192 do
+  for i=0,32767 do array('vram',i,rand(65536)) end
+  for i=0,255 do array('cgram',i,rand(32768));array('oam',i,rand(65536)) end
+  both('mode',1);both('pseudoHires',false);both('forcedBlank',false)
+  both('layer3Prio',rand(2)==0);both('colorClip',trial%4);both('preventMath',math.floor(trial/4)%4)
+  both('addSub',trial%3~=0);both('halfColors',rand(2)==0);both('subtractColors',rand(2)==0)
+  both('window1Left',rand(256));both('window1Right',rand(256))
+  both('window2Left',rand(256));both('window2Right',rand(256))
+  both('fixedColorR',rand(32));both('fixedColorG',rand(32));both('fixedColorB',rand(32))
+  both('brightness',rand(16));both('mosaicSize',1)
+  for i=0,5 do
+    array('window1Enabled',i,rand(2)==0);array('window2Enabled',i,rand(2)==0)
+    array('window1Inversed',i,rand(2)==0);array('window2Inversed',i,rand(2)==0)
+    array('windowMaskLogic',i,rand(4));array('mathEnabled',i,rand(2)==0)
+    if i<5 then
+      array('mainScreenEnabled',i,rand(2)==0);array('subScreenEnabled',i,rand(2)==0)
+      array('mainScreenWindow',i,rand(2)==0);array('subScreenWindow',i,rand(2)==0)
+      array('mosaicEnabled',i,rand(2)==0)
+    end
+  end
+  for _,line in ipairs({0,1,87,224}) do
+    fast:renderLine(line);reference:renderLine(line)
+    if line>0 then
+      for i=line*1536,line*1536+1535 do assert(fast.pixelOutput[i]==reference.pixelOutput[i], 'window/subscreen mismatch trial '..trial..' line '..line..' byte '..i) end
+    end
+  end
+end
+print('PASS: 768 main/subscreen scanlines match with randomized window masks, clipping and color math')

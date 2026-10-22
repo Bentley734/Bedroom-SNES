@@ -47,6 +47,8 @@ return function(include)
     local h,body=Console.inspect(bytes);if not h then return nil,body end
     local env=environment();local machine=env.new(env.Snes)
     include('core/fast_ppu.lua')(machine.ppu,env)
+    include('core/fast_sprites.lua')(machine.ppu,env)
+    include('core/fast_system.lua')(machine)
     local data=setmetatable({length=#body},{__index=function(_,i) if type(i)=='number' then return body:byte(i+1) end end})
     machine.cart=env.new(env.Cart,data,h,h.isHirom)
     machine:reset(true)
@@ -59,24 +61,31 @@ return function(include)
     local used=0
     while used<cycles do
       local skip=0
-      -- WAI is common during the display period. Advance only as far as the
-      -- next PPU/IRQ/refresh event, preserving the CPU's idle-cycle phase.
-      if m.cpu.waiting and not m.cpu.irqWanted and not m.cpu.nmiWanted
-        and not m.cpu.aboWanted and not m.cpu.abortWanted and not m.dmaBusy
-        and m.hdmaTimer==0 and m.xPos>0 and m.xPos<1362 then
-        local x=m.xPos;local target=1362
-        for _,event in ipairs({512,536,576,1024}) do if event>x and event<target then target=event end end
+      -- Skip only intervals with no CPU/DMA work and stop before each event.
+      -- Timer countdowns do not need one Lua call per two master clocks.
+      local x=m.xPos
+      if x>0 and x<1362 then
+        local target=x<512 and 512 or x<536 and 536 or x<576 and 576 or x<1024 and 1024 or 1362
         local irq=m.hTimer*4
         if m.hIrqEnabled and irq>x and irq<target then target=irq end
         if x~=512 and x~=536 and x~=576 and x~=1024 and x~=irq then
-          skip=math.min(target-x,(cycles-used)*2)
+          local limit=math.min(target-x,(cycles-used)*2)
+          local kind=0
+          if m.hdmaTimer>0 then skip=math.min(limit,m.hdmaTimer);kind=1
+          elseif m.dmaBusy then skip=math.min(limit,m.dmaTimer);kind=2
+          elseif x>=536 and x<576 then skip=limit;kind=3
+          elseif m.cpu.waiting and not m.cpu.irqWanted and not m.cpu.nmiWanted
+            and not m.cpu.aboWanted and not m.cpu.abortWanted then skip=limit;kind=4
+          else skip=math.min(limit,m.cpuCyclesLeft);kind=5 end
           if skip>2 then
             m.apuCatchCycles=m.apuCatchCycles+m.apuCyclesPerMaster*skip
             if m.joypadStrobe then m.joypad1Val=m.joypad1State;m.joypad2Val=m.joypad2State end
-            if x<536 or x>=576 then
+            if kind==1 then m.hdmaTimer=m.hdmaTimer-skip
+            elseif kind==2 then m.dmaTimer=m.dmaTimer-skip
+            elseif kind==4 then
               if skip>m.cpuCyclesLeft then m.cpuMemOps=0;m.cpu.cyclesLeft=0 end
               m.cpuCyclesLeft=m.cpuCyclesLeft>=skip and m.cpuCyclesLeft-skip or (m.cpuCyclesLeft-skip)%6
-            end
+            elseif kind==5 then m.cpuCyclesLeft=m.cpuCyclesLeft-skip end
             m.autoJoyTimer=math.max(0,m.autoJoyTimer-skip)
             m.xPos=x+skip;used=used+skip/2
           else skip=0 end

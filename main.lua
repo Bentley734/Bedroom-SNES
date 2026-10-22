@@ -68,8 +68,9 @@ end)
 mod.hooks:wrap('core.update',function(next,game,dt)
   if owned(game) then
     -- Game speed/catch-up can run several fixed steps in one rendered frame.
-    -- Share one small time allowance so emulation cannot multiply that cost.
-    active.hostDeadline=love.timer.getTime()+0.010
+    -- Share one 16 ms allowance so emulation cannot multiply that cost.
+    -- Leave roughly 0.7 ms of a 60 Hz frame for upload, drawing and the host.
+    active.hostDeadline=love.timer.getTime()+active.budget
     if love.window and not love.window.hasFocus() then active:pause() end
   end
   return next(game,dt)

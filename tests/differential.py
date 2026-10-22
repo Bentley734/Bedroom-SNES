@@ -43,7 +43,7 @@ def main():
     ''')
     actual=pythonize(lua.globals()[b'frames']);compare(actual,ref['frames'],'frames')
     print('PASS: six whole frames match CPU, SPC, PPU, DMA, RAM, VRAM, palette, sprites and pixel hashes')
-    lua.execute(b'''
+    opcode_test=b'''
       opcodes={}
       for _,name in ipairs({'cpu','spc'}) do
         local results={}
@@ -52,6 +52,7 @@ def main():
           local mem={read=function(_,a) if a==32768 then return op else return (a*13+7)%256 end end,
             write=function(_,a,v) writes[#writes+1]={a,v} end}
           local env=console.env;local c=env.new(name=='cpu' and env.Cpu or env.Spc,mem)
+          if fastDispatch then c.cycle=name=='cpu' and console.machine.cpu.cycle or console.machine.apu.spc.cycle end
           c.br[name=='cpu' and 4 or 0]=32768
           if name=='cpu' then
             c.br[0]=0x9a5b;c.br[1]=0x11;c.br[2]=0x27;c.br[3]=0x1ff;c.br[5]=0x100
@@ -62,9 +63,12 @@ def main():
         end end
         opcodes[name]=results
       end
-    ''')
-    compare(pythonize(lua.globals()[b'opcodes']),ref['opcodes'],'opcodes')
-    print('PASS: all 256 CPU and 256 SPC opcodes match upstream across four flag combinations (2,048 cases)')
+    '''
+    for fast in [False,True]:
+        lua.globals()[b'fastDispatch']=fast
+        lua.execute(opcode_test)
+        compare(pythonize(lua.globals()[b'opcodes']),ref['opcodes'],'opcodes')
+        print('PASS:', 'optimized' if fast else 'reference', 'CPU/SPC dispatch matches all 2,048 upstream opcode/flag cases')
     lua.execute(b'''
       local env=console.env;dsp=env.new(env.Dsp,{ram=env.typed('Uint8Array',65536)});local ram=dsp.apu.ram
       ram[0x200]=0;ram[0x201]=3;ram[0x202]=0;ram[0x203]=3;ram[0x300]=0xc3

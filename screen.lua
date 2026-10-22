@@ -2,7 +2,7 @@ return function(mod,include)
   local Console=include('core/console.lua')(include)
   local Music=require('src.core.Music')
   local TextBox=require('src.render.TextBox')
-  local Screen={};Screen.__index=Screen;Screen.isOpaque=true;Screen.screenId='BedroomSNES'
+  local Screen={};Screen.__index=Screen;Screen.isOpaque=true;Screen.isFixedSpeed=true;Screen.screenId='BedroomSNES'
   local W,H=320,288
   local COLORS={bg={0.035,0.047,0.09},panel={0.075,0.09,0.15},muted={0.56,0.62,0.74},text={0.90,0.94,1},mint={0.48,0.95,0.77},purple={0.64,0.57,0.96}}
   local keys={z=0,a=1,rshift=2,lshift=2,tab=2,['return']=3,up=4,down=5,left=6,right=7,x=8,s=9,q=10,e=11}
@@ -20,7 +20,7 @@ return function(mod,include)
   local function release(o) if o and o.release then pcall(o.release,o) end end
   function Screen.new(game,onClose)
     return setmetatable({game=game,onClose=onClose,mode='library',index=1,rows={},touch={},
-      clock=0,fps=0,frameCount=0,fpsTime=0,mute=false,budget=0.010,dirty=true},Screen)
+      clock=0,fps=0,frameCount=0,fpsTime=0,mute=false,budget=0.016,dirty=true},Screen)
   end
   function Screen:uiSize() return W,H end
   function Screen:enter()
@@ -215,12 +215,15 @@ return function(mod,include)
     self.image:replacePixels(self.imageData)
     if self.audio and self.audio:getFreeBufferCount()>0 then
       local dsp=self.console.machine.apu.dsp
-      local count=math.max(1,math.min(534,dsp.sampleOffset))
+      -- sampleOffset is a cursor capped at 533, not the frame sample count.
+      -- The core produces 534 stereo samples per 60 Hz frame (32040 Hz).
+      local count=534
       local data=love.sound.newSoundData(count,32040,16,2)
       local volume=self.mute and 0 or .55
       for i=0,count-1 do data:setSample(i,1,math.max(-1,math.min(1,dsp.samplesL[i]*volume)));data:setSample(i,2,math.max(-1,math.min(1,dsp.samplesR[i]*volume))) end
       self.audio:queue(data);release(data)
-      if not self.audio:isPlaying() then self.audio:play() end
+      -- Two queued frames absorb ordinary host jitter before playback starts.
+      if not self.audio:isPlaying() and self.audio:getFreeBufferCount()<=6 then self.audio:play() end
     end
     self.console.machine.apu.dsp.sampleOffset=0
     self.dirty=false
@@ -239,16 +242,25 @@ return function(mod,include)
     self.console:setButtons(mask)
     self.playTime=self.playTime+dt
     if self.playTime<1/60 then return end
-    local start=love.timer.getTime();local done=false
+    -- Keep a small time debt so occasional expensive frames can catch up.
+    -- The shared host deadline still bounds all fixed-step calls together.
+    self.playTime=math.min(self.playTime,3/60)
+    local start=love.timer.getTime();local completed=0
     local deadline=math.min(start+self.budget,self.hostDeadline or math.huge)
     if start>=deadline then return end
     local ok,err=pcall(function()
-      repeat done=self.console:advance(256) until done or love.timer.getTime()>=deadline
-      if done then self:video() end
+      repeat
+        local done=self.console:advance(256)
+        if done then
+          self:video()
+          self.playTime=math.max(0,self.playTime-1/60)
+          self.frameCount=self.frameCount+1;completed=completed+1
+          self:measurePerformance(love.timer.getTime(),true)
+        end
+      until love.timer.getTime()>=deadline or self.playTime<1/60 or completed>=2
     end)
     if not ok then self.error=tostring(err);self.mode='error';self:stopAudio();self:saveRam();return end
-    if done then self.playTime=math.min(self.playTime-1/60,1/60);self.frameCount=self.frameCount+1 end
-    self:measurePerformance(love.timer.getTime(),done)
+    if completed==0 then self:measurePerformance(love.timer.getTime(),false) end
     if self.clock-(self.lastSave or 0)>30 then self.lastSave=self.clock;self:saveRam() end
   end
   function Screen:measurePerformance(now,completed)

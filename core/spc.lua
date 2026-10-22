@@ -69,8 +69,8 @@ return function(env)
           local instr = self["mem"]["read"](self["mem"], (function() local _old = self["br"][PC]; self["br"][PC] = _u16(_old + 1); return _old end)())
           local mode = self["modes"][instr]
           self["cyclesLeft"] = self["cycles"][instr]
-          local eff = self["getAdr"](self, mode)
-          self["functions"][instr](self, eff[0], eff[1], instr)
+          local eff0, eff1 = self["getAdr"](self, mode)
+          self["functions"][instr](self, eff0, eff1, instr)
         end
         self["cyclesLeft"] = self["cyclesLeft"] - 1
       end
@@ -128,101 +128,101 @@ return function(env)
           repeat
             if _fall or _switch1 == IMP then
               _fall = true
-              do return {length = 2, [0] = 0, [1] = 0} end
+              do return 0, 0 end
             end
             if _fall or _switch1 == REL then
               _fall = true
               local rel = self["mem"]["read"](self["mem"], (function() local _old = self["br"][PC]; self["br"][PC] = _u16(_old + 1); return _old end)())
-              do return {length = 2, [0] = self["getSigned"](self, rel), [1] = 0} end
+              do return self["getSigned"](self, rel), 0 end
             end
             if _fall or _switch1 == DP then
               _fall = true
               local adr = self["mem"]["read"](self["mem"], (function() local _old = self["br"][PC]; self["br"][PC] = _u16(_old + 1); return _old end)())
-              do return {length = 2, [0] = bor(adr, _sel(_truth(self["p"]), 256, 0)), [1] = bor(band((adr + 1), 255), _sel(_truth(self["p"]), 256, 0))} end
+              do return bor(adr, _sel(_truth(self["p"]), 256, 0)), bor(band((adr + 1), 255), _sel(_truth(self["p"]), 256, 0)) end
             end
             if _fall or _switch1 == DPR then
               _fall = true
               local adr = self["mem"]["read"](self["mem"], (function() local _old = self["br"][PC]; self["br"][PC] = _u16(_old + 1); return _old end)())
               local rel = self["mem"]["read"](self["mem"], (function() local _old = self["br"][PC]; self["br"][PC] = _u16(_old + 1); return _old end)())
-              do return {length = 2, [0] = bor(adr, _sel(_truth(self["p"]), 256, 0)), [1] = self["getSigned"](self, rel)} end
+              do return bor(adr, _sel(_truth(self["p"]), 256, 0)), self["getSigned"](self, rel) end
             end
             if _fall or _switch1 == ABS then
               _fall = true
               local adr = self["mem"]["read"](self["mem"], (function() local _old = self["br"][PC]; self["br"][PC] = _u16(_old + 1); return _old end)())
               adr = bor(adr, lshift(self["mem"]["read"](self["mem"], (function() local _old = self["br"][PC]; self["br"][PC] = _u16(_old + 1); return _old end)()), 8))
-              do return {length = 2, [0] = adr, [1] = 0} end
+              do return adr, 0 end
             end
             if _fall or _switch1 == IND then
               _fall = true
-              do return {length = 2, [0] = bor(self["r"][X], _sel(_truth(self["p"]), 256, 0)), [1] = 0} end
+              do return bor(self["r"][X], _sel(_truth(self["p"]), 256, 0)), 0 end
             end
             if _fall or _switch1 == IDX then
               _fall = true
               local pointer = self["mem"]["read"](self["mem"], (function() local _old = self["br"][PC]; self["br"][PC] = _u16(_old + 1); return _old end)())
               local adr = self["mem"]["read"](self["mem"], bor(band((pointer + self["r"][X]), 255), _sel(_truth(self["p"]), 256, 0)))
               adr = bor(adr, lshift(self["mem"]["read"](self["mem"], bor(band(((pointer + 1) + self["r"][X]), 255), _sel(_truth(self["p"]), 256, 0))), 8))
-              do return {length = 2, [0] = adr, [1] = 0} end
+              do return adr, 0 end
             end
             if _fall or _switch1 == IMM then
               _fall = true
-              do return {length = 2, [0] = (function() local _old = self["br"][PC]; self["br"][PC] = _u16(_old + 1); return _old end)(), [1] = 0} end
+              do return (function() local _old = self["br"][PC]; self["br"][PC] = _u16(_old + 1); return _old end)(), 0 end
             end
             if _fall or _switch1 == DPX then
               _fall = true
               local adr = self["mem"]["read"](self["mem"], (function() local _old = self["br"][PC]; self["br"][PC] = _u16(_old + 1); return _old end)())
-              do return {length = 2, [0] = bor(band((adr + self["r"][X]), 255), _sel(_truth(self["p"]), 256, 0)), [1] = 0} end
+              do return bor(band((adr + self["r"][X]), 255), _sel(_truth(self["p"]), 256, 0)), 0 end
             end
             if _fall or _switch1 == ABX then
               _fall = true
               local adr = self["mem"]["read"](self["mem"], (function() local _old = self["br"][PC]; self["br"][PC] = _u16(_old + 1); return _old end)())
               adr = bor(adr, lshift(self["mem"]["read"](self["mem"], (function() local _old = self["br"][PC]; self["br"][PC] = _u16(_old + 1); return _old end)()), 8))
-              do return {length = 2, [0] = band((adr + self["r"][X]), 65535), [1] = 0} end
+              do return band((adr + self["r"][X]), 65535), 0 end
             end
             if _fall or _switch1 == ABY then
               _fall = true
               local adr = self["mem"]["read"](self["mem"], (function() local _old = self["br"][PC]; self["br"][PC] = _u16(_old + 1); return _old end)())
               adr = bor(adr, lshift(self["mem"]["read"](self["mem"], (function() local _old = self["br"][PC]; self["br"][PC] = _u16(_old + 1); return _old end)()), 8))
-              do return {length = 2, [0] = band((adr + self["r"][Y]), 65535), [1] = 0} end
+              do return band((adr + self["r"][Y]), 65535), 0 end
             end
             if _fall or _switch1 == IDY then
               _fall = true
               local pointer = self["mem"]["read"](self["mem"], (function() local _old = self["br"][PC]; self["br"][PC] = _u16(_old + 1); return _old end)())
               local adr = self["mem"]["read"](self["mem"], bor(pointer, _sel(_truth(self["p"]), 256, 0)))
               adr = bor(adr, lshift(self["mem"]["read"](self["mem"], bor(band((pointer + 1), 255), _sel(_truth(self["p"]), 256, 0))), 8))
-              do return {length = 2, [0] = band((adr + self["r"][Y]), 65535), [1] = 0} end
+              do return band((adr + self["r"][Y]), 65535), 0 end
             end
             if _fall or _switch1 == DD then
               _fall = true
               local adr = self["mem"]["read"](self["mem"], (function() local _old = self["br"][PC]; self["br"][PC] = _u16(_old + 1); return _old end)())
               local adr2 = self["mem"]["read"](self["mem"], (function() local _old = self["br"][PC]; self["br"][PC] = _u16(_old + 1); return _old end)())
-              do return {length = 2, [0] = bor(adr, _sel(_truth(self["p"]), 256, 0)), [1] = bor(adr2, _sel(_truth(self["p"]), 256, 0))} end
+              do return bor(adr, _sel(_truth(self["p"]), 256, 0)), bor(adr2, _sel(_truth(self["p"]), 256, 0)) end
             end
             if _fall or _switch1 == II then
               _fall = true
-              do return {length = 2, [0] = bor(self["r"][Y], _sel(_truth(self["p"]), 256, 0)), [1] = bor(self["r"][X], _sel(_truth(self["p"]), 256, 0))} end
+              do return bor(self["r"][Y], _sel(_truth(self["p"]), 256, 0)), bor(self["r"][X], _sel(_truth(self["p"]), 256, 0)) end
             end
             if _fall or _switch1 == DI then
               _fall = true
               local imm = (function() local _old = self["br"][PC]; self["br"][PC] = _u16(_old + 1); return _old end)()
               local adr = self["mem"]["read"](self["mem"], (function() local _old = self["br"][PC]; self["br"][PC] = _u16(_old + 1); return _old end)())
-              do return {length = 2, [0] = imm, [1] = bor(adr, _sel(_truth(self["p"]), 256, 0))} end
+              do return imm, bor(adr, _sel(_truth(self["p"]), 256, 0)) end
             end
             if _fall or _switch1 == DPY then
               _fall = true
               local adr = self["mem"]["read"](self["mem"], (function() local _old = self["br"][PC]; self["br"][PC] = _u16(_old + 1); return _old end)())
-              do return {length = 2, [0] = bor(band((adr + self["r"][Y]), 255), _sel(_truth(self["p"]), 256, 0)), [1] = 0} end
+              do return bor(band((adr + self["r"][Y]), 255), _sel(_truth(self["p"]), 256, 0)), 0 end
             end
             if _fall or _switch1 == ABB then
               _fall = true
               local adr = self["mem"]["read"](self["mem"], (function() local _old = self["br"][PC]; self["br"][PC] = _u16(_old + 1); return _old end)())
               adr = bor(adr, lshift(self["mem"]["read"](self["mem"], (function() local _old = self["br"][PC]; self["br"][PC] = _u16(_old + 1); return _old end)()), 8))
-              do return {length = 2, [0] = band(adr, 8191), [1] = arshift(adr, 13)} end
+              do return band(adr, 8191), arshift(adr, 13) end
             end
             if _fall or _switch1 == DXR then
               _fall = true
               local adr = self["mem"]["read"](self["mem"], (function() local _old = self["br"][PC]; self["br"][PC] = _u16(_old + 1); return _old end)())
               local rel = self["getSigned"](self, self["mem"]["read"](self["mem"], (function() local _old = self["br"][PC]; self["br"][PC] = _u16(_old + 1); return _old end)()))
-              do return {length = 2, [0] = bor(band((adr + self["r"][X]), 255), _sel(_truth(self["p"]), 256, 0)), [1] = rel} end
+              do return bor(band((adr + self["r"][X]), 255), _sel(_truth(self["p"]), 256, 0)), rel end
             end
             if _fall or _switch1 == IAX then
               _fall = true
@@ -230,11 +230,11 @@ return function(env)
               adr = bor(adr, lshift(self["mem"]["read"](self["mem"], (function() local _old = self["br"][PC]; self["br"][PC] = _u16(_old + 1); return _old end)()), 8))
               local radr = self["mem"]["read"](self["mem"], band((adr + self["r"][X]), 65535))
               radr = bor(radr, lshift(self["mem"]["read"](self["mem"], band(((adr + self["r"][X]) + 1), 65535)), 8))
-              do return {length = 2, [0] = radr, [1] = 0} end
+              do return radr, 0 end
             end
             if _fall or _switch1 == IPI then
               _fall = true
-              do return {length = 2, [0] = bor((function() local _old = self["r"][X]; self["r"][X] = _u8(_old + 1); return _old end)(), _sel(_truth(self["p"]), 256, 0)), [1] = 0} end
+              do return bor((function() local _old = self["r"][X]; self["r"][X] = _u8(_old + 1); return _old end)(), _sel(_truth(self["p"]), 256, 0)), 0 end
             end
           until true
         end

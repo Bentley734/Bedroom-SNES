@@ -40,6 +40,7 @@ function love.load()
     check(screen.pendingLoad,'release then confirm launches the cartridge')
     screen:update(1/60)
     check(screen.console~=nil and screen.mode=='playing','built-in original SNES cartridge loads')
+    check(require('src.core.Game').isFixedSpeedInStack(stack),'SNES clock ignores Pokemon speed multipliers')
     screen.waitRelease=false
     for i=1,4 do screen.console:frame() end
     screen:video();screenshot(screen,'playing')

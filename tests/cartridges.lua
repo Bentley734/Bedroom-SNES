@@ -1,0 +1,27 @@
+local function patch(s,offset,value) return s:sub(1,offset)..string.char(value)..s:sub(offset+2) end
+local function rejected(bytes,fragment)
+  local h,err=Console.inspect(bytes);assert(not h and err:find(fragment,1,true),tostring(err))
+end
+rejected('garbage','32 KiB')
+rejected(patch(demo,0x7fd6,0x13),'enhancement chip')
+rejected(patch(demo,0x7fd7,255),'memory sizes')
+rejected(patch(demo,0x7fd8,255),'memory sizes')
+rejected(patch(demo,0x7fd9,2),'PAL')
+rejected(patch(demo,0x7fd5,0x23),'layout')
+rejected(demo..demo..demo,'Non power-of-two')
+local withHeader=string.rep('\0',512)..demo
+local a=assert(Console.new(withHeader));assert(a.header.name=='BEDROOM SNES DEMO')
+local battery=patch(patch(demo,0x7fd6,2),0x7fd8,3)
+local b=assert(Console.new(battery));assert(b.machine.cart.sram.length==8192)
+b.machine.cart:write(0x70,0x23,0xa5)
+assert(b.machine.cart:read(0x70,0x23)==0xa5)
+local saved=b:saveRam();assert(#saved==8192)
+assert(not b:loadRam('truncated') and b.machine.cart:read(0x70,0x23)==0xa5)
+local c=assert(Console.new(battery));assert(c:loadRam(saved));assert(c.machine.cart:read(0x70,0x23)==0xa5)
+c:reset();assert(c.machine.cart:read(0x70,0x23)==0xa5,'soft reset erased battery RAM')
+-- Put the same cartridge in a conventional 64 KiB HiROM image.
+local hi=demo..demo;hi=patch(hi,0xffd5,0x21);hi=patch(hi,0xffd7,6)
+hi=patch(hi,0x7fd5,0xff)
+local h=assert(Console.new(hi));assert(h.header.isHirom)
+h:frame();assert(not h.machine.ppu.forcedBlank,'HiROM test cartridge did not boot')
+print('PASS: malformed/chip/PAL bounds, copier header, LoROM/HiROM boot, SRAM round-trip and reset persistence')

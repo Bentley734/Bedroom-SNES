@@ -1,0 +1,26 @@
+name: Validate Lua core
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: python -m pip install lupa==2.8 esprima==4.0.1
+      - run: |
+          git clone https://github.com/angelo-wf/SnesJs.git /tmp/snesjs
+          git -C /tmp/snesjs checkout b904fdb63be15dc0470b69091622ba5b1bde7275
+          python tools/port_core.py /tmp/snesjs
+          python tools/build_demo.py
+          git diff --exit-code -- core roms/bedroom-demo.sfc
+      - run: python tests/run.py
+      - run: python tests/portable.py
+      - run: python tests/differential.py
+        env:
+          SNESJS_SOURCE: /tmp/snesjs
+      - run: python tools/package_release.py

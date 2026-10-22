@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+dist/
+roms/*
+!roms/bedroom-demo.sfc
+!roms/README.txt

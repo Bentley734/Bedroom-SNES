@@ -8,14 +8,6 @@ return function(mod,include)
   local keys={z=0,a=1,rshift=2,lshift=2,tab=2,['return']=3,up=4,down=5,left=6,right=7,x=8,s=9,q=10,e=11}
   local padBits={b=0,y=1,back=2,start=3,dpup=4,dpdown=5,dpleft=6,dpright=7,a=8,x=9,leftshoulder=10,rightshoulder=11}
   local padKeys={dpup='up',dpdown='down',a='return',b='escape',start='return',back='escape'}
-  local touchButtons={
-    {name='UP',bit=4,x=39,y=213,w=29,h=22},{name='LEFT',bit=6,x=10,y=238,w=29,h=22},
-    {name='DOWN',bit=5,x=39,y=263,w=29,h=22},{name='RIGHT',bit=7,x=68,y=238,w=29,h=22},
-    {name='Y',bit=1,x=220,y=238,w=27,h=22},{name='X',bit=9,x=249,y=213,w=27,h=22},
-    {name='B',bit=0,x=249,y=263,w=27,h=22},{name='A',bit=8,x=278,y=238,w=27,h=22},
-    {name='L',bit=10,x=112,y=218,w=40,h=20},{name='R',bit=11,x=160,y=218,w=40,h=20},
-    {name='SELECT',bit=2,x=107,y=263,w=45,h=20},{name='START',bit=3,x=160,y=263,w=45,h=20},
-  }
   local function color(name) love.graphics.setColor(COLORS[name]) end
   local function release(o) if o and o.release then pcall(o.release,o) end end
   function Screen.new(game,onClose)
@@ -24,7 +16,7 @@ return function(mod,include)
   end
   function Screen:uiSize() return W,H end
   function Screen:enter()
-    self.font=love.graphics.newFont(12);self.small=love.graphics.newFont(9);self.padFont=love.graphics.newFont(8);self.titleFont=love.graphics.newFont(23)
+    self.font=love.graphics.newFont(12);self.small=love.graphics.newFont(9);self.titleFont=love.graphics.newFont(23)
     if self.game.input and self.game.input.reset then self.game.input:reset() end
     self:refresh()
   end
@@ -106,7 +98,7 @@ return function(mod,include)
   end
   function Screen:exit()
     self:saveRam();self:discard();self:restoreMusic();self.touch={}
-    release(self.font);release(self.small);release(self.padFont);release(self.titleFont)
+    release(self.font);release(self.small);release(self.titleFont)
     if self.game.input and self.game.input.reset then self.game.input:reset() end
     if self.onClose then self.onClose() end
     if self.returnToBedroom and self.slowSession and self.game.stack:top() then
@@ -154,17 +146,16 @@ return function(mod,include)
       return true
     end
     if type(x)~='number' or type(y)~='number' then return true end
-    if self.game.renderer and self.game.renderer.frameRects then
+    if self.presentation then
+      local r=self.presentation
+      x,y=(x-r.x)/r.sx,(y-r.y)/r.sy
+    elseif self.game.renderer and self.game.renderer.frameRects then
       local r=self.game.renderer:frameRects()
       x,y=(x-r.uox)/r.Ux,(y-r.uoy)/r.Uy
     end
     if ev.phase~='pressed' and ev.phase~='moved' then return true end
     if self.mode=='playing' then
-      if y<24 and ev.phase=='pressed' then self:pause();return true end
-      for _,b in ipairs(touchButtons) do
-        if x>=b.x and x<b.x+b.w and y>=b.y and y<b.y+b.h then self.touch[id]=b.bit;return true end
-      end
-      self.touch[id]=nil
+      if ev.phase=='pressed' then self:pause() end
     elseif ev.phase=='pressed' then
       if self.mode=='library' then
         if y<30 and x>270 then self:close()
@@ -279,6 +270,50 @@ return function(mod,include)
   local function text(font,value,x,y,tint)
     love.graphics.setFont(font);color(tint or 'text');love.graphics.print(value,x,y)
   end
+  function Screen:drawPause()
+    local g=love.graphics
+      if self.mode=='paused' or self.mode=='error' then
+        g.setColor(0.02,0.03,0.06,.94);g.rectangle('fill',12,51,296,190,8)
+        text(self.titleFont,self.mode=='error' and 'Emulation stopped' or 'Paused',26,65)
+        g.setFont(self.small);color('muted');g.printf((self.error or self.notice or 'ESC / P resume  |  R reset  |  M mute') :sub(1,220),26,104,267,'left')
+        if self.mode~='error' then text(self.font,'Resume  /  Enter or A',27,148,'mint') end
+        text(self.font,'Cartridges  /  Q or B',27,178)
+        text(self.font,'Return to room  /  Backspace or Y',27,208)
+      end
+  end
+  -- Coordinates and scales are in physical framebuffer pixels before DPI
+  -- conversion, so 125%/150% desktop scaling cannot introduce fractional pixels.
+  function Screen:layout(ctx,w,h)
+    local dx,dy=ctx.dpiX or 1,ctx.dpiY or 1
+    local pw,ph=ctx.pw or ctx.ww*dx,ctx.ph or ctx.wh*dy
+    local scale=math.floor(math.min(pw/w,ph/h))
+    if scale<1 then scale=math.min(pw/w,ph/h) end
+    return {x=(ctx.viewX or 0)+math.floor((pw-w*scale)/2)/dx,
+      y=(ctx.viewY or 0)+math.floor((ph-h*scale)/2)/dy,
+      sx=scale/dx,sy=scale/dy,scale=scale,w=w,h=h}
+  end
+  function Screen:present(ctx)
+    local g=love.graphics
+    g.push('all');g.origin();g.setShader();g.setScissor()
+    g.setBlendMode('alpha');g.setColor(0,0,0,1);g.rectangle('fill',0,0,ctx.ww,ctx.wh)
+    local ui=self:layout(ctx,W,H);self.presentation=ui
+    if self.image and self.mode~='library' and self.mode~='instructions' then
+      local p=self.console.machine.ppu
+      local width=(p.mode==5 or p.mode==6 or p.pseudoHires) and 512 or 256
+      local r=self:layout(ctx,width,self.videoHeight or 224)
+      self.cartridgePresentation=r
+      g.setColor(1,1,1,1)
+      g.draw(self.image,self.quad,r.x,r.y,0,r.sx*width/512,r.sy)
+      if self.mode=='paused' or self.mode=='error' then
+        g.translate(ui.x,ui.y);g.scale(ui.sx,ui.sy);self:drawPause()
+      end
+    elseif ctx.uiCanvas then
+      g.setColor(1,1,1,1)
+      g.draw(ctx.uiCanvas,ui.x,ui.y,0,ui.sx,ui.sy)
+    end
+    g.pop()
+    return true
+  end
   function Screen:draw()
     local g=love.graphics;g.push('all');g.origin();g.setShader();color('bg');g.rectangle('fill',0,0,W,H)
     if self.mode=='instructions' then
@@ -290,7 +325,7 @@ return function(mod,include)
       text(self.font,'Controller',16,135,'purple')
       text(self.small,'Click the right stick, or hold Start + Select.',16,154)
       text(self.small,'Then press Y to return to the bedroom.',16,169,'muted')
-      text(self.small,'TOUCH: tap PAUSE, then Return to room.',16,196)
+      text(self.small,'TOUCH: tap the picture to pause and exit.',16,196)
       color('purple');g.rectangle('fill',12,220,296,27,5)
       text(self.font,'Play cartridge  /  Enter or A',22,226)
       text(self.small,'Back to cartridges  /  Escape or B',22,258,'muted')
@@ -312,24 +347,9 @@ return function(mod,include)
       if self.image then
         g.setColor(1,1,1,1)
         local vh=self.videoHeight or 224
-        local scale=math.min(304/256,179/vh);local width,height=256*scale,vh*scale
-        -- Pixel data occupies the first vh rows of a 512x240 backing image.
-        g.draw(self.image,self.quad,(W-width)/2,25,0,width/512,height/vh)
+        g.draw(self.image,self.quad,32,math.floor((H-vh)/2),0,.5,1)
       end
-      text(self.small,'SNES  /  '..string.format('%.1f FPS',self.fps),10,8,'mint')
-      text(self.small,'PAUSE',275,8,'muted')
-      for _,b in ipairs(touchButtons) do
-        color('panel');g.rectangle('fill',b.x,b.y,b.w,b.h,5)
-        g.setFont(self.padFont);color('text');g.printf(b.name,b.x,b.y+6,b.w,'center')
-      end
-      if self.mode=='paused' or self.mode=='error' then
-        g.setColor(0.02,0.03,0.06,.94);g.rectangle('fill',12,51,296,190,8)
-        text(self.titleFont,self.mode=='error' and 'Emulation stopped' or 'Paused',26,65)
-        g.setFont(self.small);color('muted');g.printf((self.error or self.notice or 'ESC / P resume  |  R reset  |  M mute') :sub(1,220),26,104,267,'left')
-        if self.mode~='error' then text(self.font,'Resume  /  Enter or A',27,148,'mint') end
-        text(self.font,'Cartridges  /  Q or B',27,178)
-        text(self.font,'Return to room  /  Backspace or Y',27,208)
-      end
+      self:drawPause()
     end
     g.pop()
   end

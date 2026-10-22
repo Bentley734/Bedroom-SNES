@@ -8,7 +8,7 @@ def main():
     output=dist/f'Bedroom-SNES-v{version}.zip'
     files=['manifest.json','main.lua','screen.lua','README.md','LICENSE','THIRD_PARTY.txt','roms/bedroom-demo.sfc','roms/README.txt']
     files+=sorted(str(p.relative_to(ROOT)).replace('\\','/') for p in (ROOT/'core').glob('*.lua'))
-    files+=['docs/library.png','docs/playing.png','docs/instructions.png']
+    files+=['docs/library.png','docs/playing.png','docs/instructions.png','docs/integer-presentation.png']
     with zipfile.ZipFile(output,'w',compression=zipfile.ZIP_DEFLATED,compresslevel=9) as archive:
         for name in files:
             info=zipfile.ZipInfo('bedroom_snes/'+name,date_time=(2026,10,22,0,0,0))

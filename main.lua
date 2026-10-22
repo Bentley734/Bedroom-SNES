@@ -49,6 +49,12 @@ mod.content.map_scripts:register('REDS_HOUSE_2F',{
 local function owned(game)
   return active and game and game.stack and game.stack:top()==active
 end
+-- Own the final composition while the SNES is topmost. The Pokemon palette
+-- pass and shader chain must not quantize full-color cartridge pixels or menus.
+mod.hooks:wrap('render.compose',function(next,renderer,ctx)
+  if active and owned(active.game) then return active:present(ctx) end
+  return next(renderer,ctx)
+end,1000)
 mod.hooks:wrap('input.key',function(next,game,ev)
   if not owned(game) then return next(game,ev) end
   if ev.phase=='pressed' then active:key(ev.key) end

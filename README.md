@@ -2,18 +2,18 @@
 
 A **pure-Lua SNES emulator inside Gen1Recomp**, opened by interacting with the SNES in the player's upstairs bedroom in Pallet Town. Supports Pokémon Red, Blue, and Yellow.
 
-**v0.2.0 is an experimental preview.** The included original homebrew cartridge boots and responds to controls. Speed and game compatibility vary; this is not a full-speed, broadly compatible replacement for a standalone emulator. No commercial SNES ROMs are included.
+**v0.2.1 is an experimental preview.** The included original homebrew cartridge boots and responds to controls. Speed and game compatibility vary; this is not a full-speed, broadly compatible replacement for a standalone emulator. No commercial SNES ROMs are included.
 
 ![Bedroom SNES cartridge menu](docs/library.png)
 ![Original homebrew running inside the emulator](docs/playing.png)
 
 ## Install and play
 
-1. Download `Bedroom-SNES-v0.2.0.zip` from [Releases](https://github.com/Bentley734/Bedroom-SNES/releases/latest).
+1. Download `Bedroom-SNES-v0.2.1.zip` from [Releases](https://github.com/Bentley734/Bedroom-SNES/releases/latest).
 2. Import it using Gen1Recomp's mod manager and enable **Bedroom SNES** for Red, Blue, or Yellow. Gen1Recomp **0.3.54 or newer** is required; native loader/graphics tests cover 0.3.54 and 0.3.95.
 3. Go upstairs in the player's house in Pallet Town and interact with the SNES. Select **bedroom-demo** to try the included cartridge.
 4. Read the exit instructions shown **before every cartridge launch**, release the launch button, then confirm to play.
-5. Press **Backspace** to return straight to the bedroom, or **Escape/P** to open the pause menu. A controller or the on-screen controls also work.
+5. Press **Backspace** to return straight to the bedroom, or **Escape/P** to open the pause menu. Controller pause and exit controls also work.
 
 ![Exit instructions shown before launching](docs/instructions.png)
 
@@ -38,7 +38,7 @@ SNES keyboard controls apply while a cartridge is playing; the normal Pokémon c
 | Pause | Escape / P | Right-stick click, or hold Start + Select |
 | Return straight to bedroom | Backspace | Pause, then Y |
 
-The on-screen pad provides all twelve SNES controls. Tap **PAUSE** at the top to open the pause menu. In that menu: Enter/A resumes, Q/B opens the cartridge menu, Backspace/Y returns to the bedroom, R resets the cartridge, and M toggles sound. The demo uses the D-pad to scroll its picture and Start to recenter it.
+Gameplay has no on-screen controls or HUD. Tap/click the picture to open the pause menu. Use a keyboard or controller to play. In that menu: Enter/A resumes, Q/B opens the cartridge menu, Backspace/Y returns to the bedroom, R resets the cartridge, and M toggles sound. The demo uses the D-pad to scroll its picture and Start to recenter it.
 
 If a session stays below **20 emulated FPS** for three consecutive two-second measurement windows after the warm-up windows, the player comments on returning to the bedroom: **“I think there's something wrong with my SNES...”** Pauses and launch/loading time are excluded. Normal performance and brief slowdowns do not trigger the line.
 
@@ -58,7 +58,7 @@ Battery-backed cartridge RAM saves automatically about every 30 seconds of activ
 
 `tests/run.py` covers original-demo boot/input, cartridge validation, SRAM, 1,776 PPU scanlines (including windows, subscreen math and size-one mosaic), 1,664 sprite scanlines, 60 scheduler frames, 1,728 partial scheduler/state comparisons, frame pacing, and the complete 534-sample stereo audio queue. `tests/differential.py` checks both reference and optimized CPU/SPC dispatch against all 2,048 opcode/flag cases, six full machine/frame snapshots and 512 audible stereo DSP samples. Private-ROM runs render every frame and match 21 Mario World, 23 All-Stars and 18 Zombies checkpoints for image hashes, CPU/SPC positions and audio peaks. These establish agreement with SnesJs, not physical-hardware accuracy.
 
-`tests/love_main.lua` exercises the production mod loader and sandbox, bedroom MapScripts, native graphics/audio, raw input capture, all twelve touch control routing, pause/resume, repeat entry/exit, storage, save-failure handling and restoration of normal input/touch controls. Native fixtures do not launch a user's save file.
+`tests/love_main.lua` exercises the production mod loader and sandbox, bedroom MapScripts, native graphics/audio, raw input capture, tap-to-pause and resized pointer routing, pause/resume, repeat entry/exit, storage, save-failure handling and restoration of normal input/touch controls. Native fixtures do not launch a user's save file.
 
 Developer dependencies: Python with `lupa` (LuaJIT backend), Node.js for the differential oracle, and a LÖVE 11.x runtime plus Gen1Recomp sources/test fixtures for the native test. `tests/prepare_love.py` documents this workspace's isolated probe setup. Run from the repository root:
 
@@ -83,3 +83,9 @@ See [THIRD_PARTY.txt](THIRD_PARTY.txt) and [LICENSE](LICENSE). The original demo
 The optimized Mode 1 renderer packs tile bitplanes once per tile row, resolves background/sprite priority with reusable buffers, and supports window masks, clipping, fixed-color and main/subscreen math. Size-one mosaic stays on this path because it changes no pixels. Other modes, larger mosaic and hires use the reference renderer. Palette conversion is refreshed every scanline; sprite overflow and interlace behavior remain reference-compatible. No Snes9x-Z code was copied; batching and redundant-work removal inspired the optimization. The mod remains single-threaded with no new permissions.
 
 The SNES state opts out of Pokemon speed multipliers. Audio queues all 534 stereo samples per 60 Hz frame and buffers two frames before playback to absorb ordinary timing jitter. Low-performance devices can still stutter; this does not add the upstream core's missing DSP echo.
+
+## Full-color window presentation
+
+v0.2.1 presents the cartridge and menus through the engine composition hook, preserving their RGB colors independently of Pokemon palettes and post-processing. Gameplay uses the largest centered integer scale that fits the window in physical pixels, with nearest-neighbor filtering and black borders. Standard 256-pixel SNES output, horizontal hires and overscan keep their source dimensions. Very small windows that cannot fit even 1x use a reduced fit. There is no on-screen pad, FPS label or pause label. Escape/P pauses, Backspace exits immediately, and tapping/clicking opens the pause menu. The launch instructions still explain exit controls.
+
+Native presentation tests run the real Renderer:endFrame path with forced palettes and an enabled shader path. They check unchanged cartridge RGB, identical menu colors across palette modes, three window sizes, DPI-aware integer placement and resized pause-menu input.

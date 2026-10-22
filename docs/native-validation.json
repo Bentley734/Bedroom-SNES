@@ -1,41 +1,41 @@
 {
-  "testedAt": "2026-10-22T08:35:54.958847+00:00",
+  "testedAt": "2026-10-22T09:01:38.844843+00:00",
   "nativeRuntime": "L\u00d6VE 11.x Windows x64",
   "matrix": [
     {
       "engine": "0.3.54",
       "game": "red",
-      "checks": 36,
+      "checks": 39,
       "passed": true
     },
     {
       "engine": "0.3.54",
       "game": "blue",
-      "checks": 36,
+      "checks": 39,
       "passed": true
     },
     {
       "engine": "0.3.54",
       "game": "yellow",
-      "checks": 36,
+      "checks": 39,
       "passed": true
     },
     {
       "engine": "0.3.95",
       "game": "red",
-      "checks": 36,
+      "checks": 39,
       "passed": true
     },
     {
       "engine": "0.3.95",
       "game": "blue",
-      "checks": 36,
+      "checks": 39,
       "passed": true
     },
     {
       "engine": "0.3.95",
       "game": "yellow",
-      "checks": 36,
+      "checks": 39,
       "passed": true
     }
   ]

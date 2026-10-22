@@ -1,8 +1,9 @@
 local a=assert(Console.new(demo))
 local function referenceClock(c)
   local original=c.env.new(c.env.Snes)
+  for _,name in ipairs({'read','rread','write','getAccessTime'}) do c.machine[name]=original[name] end
   c.machine.cycle=original.cycle;c.machine.cpuCycle=original.cpuCycle
-  c.machine.cpu.cycle=original.cpu.cycle;c.machine.apu.spc.cycle=original.apu.spc.cycle
+  c.machine.cpu.cycle=original.cpu.cycle;c.machine.cpu.getAdr=original.cpu.getAdr;c.machine.apu.spc.cycle=original.apu.spc.cycle;c.machine.apu.spc.getAdr=original.apu.spc.getAdr
 end
 local b=assert(Console.new(demo));referenceClock(b)
 for frame=1,60 do

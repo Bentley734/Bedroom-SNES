@@ -50,5 +50,6 @@ def main():
     lua.execute((ROOT/'tests/fast_sprites.lua').read_bytes())
     lua.execute((ROOT/'tests/frontend_timing.lua').read_bytes())
     lua.execute((ROOT/'tests/scheduler.lua').read_bytes())
+    lua.execute((ROOT/'tests/fast_address.lua').read_bytes())
     lua.execute((ROOT/'tests/cartridges.lua').read_bytes())
 if __name__=='__main__':main()

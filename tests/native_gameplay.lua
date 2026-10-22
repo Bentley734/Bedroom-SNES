@@ -7,12 +7,13 @@
 -- paced.inputs can replace paced.mask: [{"seconds":2,"mask":0}, ...].
 local records={}
 local Json
-local screen,canvas
+local screen,canvas,drawHost
 local function report()
   love.filesystem.write('native-gameplay-result.json',Json.encode(records))
 end
 local function draw()
-  love.graphics.setCanvas(canvas);screen:draw();love.graphics.setCanvas()
+  if drawHost then drawHost() else love.graphics.setCanvas(canvas);screen:draw() end
+  love.graphics.setCanvas()
   love.graphics.flushBatch()
 end
 local function shot(name)
@@ -55,12 +56,29 @@ function love.load()
     local stack=setmetatable({}, {__index=require('src.core.StateStack')});stack:init()
     local input=require('src.core.Input');input:init()
     local game={stack=stack,input=input,data=loaded.data,save={version='red',meta={playthroughId='bedroom_snes_private_gameplay_test'}}}
+    if plan.fullRenderer then
+      local Renderer=require('src.render.Renderer');local View=require('src.render.GameViewport')
+      local width,height=plan.width or 1570,plan.height or 1268
+      Renderer:init();Renderer:setUISize(320,288);game.renderer=Renderer
+      View.dimensions=function() return width,height end
+      View.pixelDimensions=function() return width,height end
+      View.setTarget=function() love.graphics.setCanvas(canvas) end
+      require('src.render.PaletteFX').setMode('redpp')
+      game.draw=function()
+        Renderer:beginFrame(false);screen:draw()
+        Renderer:endFrame({{x=0,y=0,w=320,h=288,colors={{255,255,255},{100,180,255},{0,90,150},{0,0,0}}}})
+      end
+      drawHost=function() game:draw() end
+    end
     stack:push({screenId='BedroomFixture'})
+    local initialDraw=game.draw
     screen=loaded.loader.exports.bedroom_snes.openBedroomSNES(game)
+    records.directPresentation=game.draw~=initialDraw
+    records.window={width=plan.width or (plan.fullRenderer and 1570 or 320),height=plan.height or (plan.fullRenderer and 1268 or 288)}
     local found=false
     for i,row in ipairs(screen.rows) do if row.name=='private-test.sfc' then screen.index=i;found=true end end
     assert(found,'Private cartridge was not present in the isolated probe')
-    canvas=love.graphics.newCanvas(320,288)
+    canvas=love.graphics.newCanvas(plan.fullRenderer and (plan.width or 1570) or 320,plan.fullRenderer and (plan.height or 1268) or 288)
     screen:requestLaunch();shot('instructions');screen:keyReleased('return');screen:key('return');screen:update(1/60)
     assert(screen.console,screen.error or 'Private cartridge did not load')
     if plan.expectedTitle then assert(screen.console.header.name==plan.expectedTitle,'Wrong cartridge selected') end
@@ -120,11 +138,13 @@ function love.load()
     screen.frameCount=0;screen.clock=0;screen.lastSave=0;screen.fps=0
     local FixedStep=require('src.core.FixedStep')
     FixedStep.setHz(60);FixedStep:init(function(dt) screen:update(dt) end)
-    FixedStep.refreshPeriod=1/60
+    local hostHz=paced.hostHz or 60
+    FixedStep.refreshPeriod=1/hostHz
     local times={}
     local started=love.timer.getTime()
     screen.performance={windowAt=started,windowFrames=0,slowWindows=0,warmup=2}
     local previous=started-1/60
+    screen.lastHostTime=previous
     local firstFrame=screen.console.machine.frames
     local ticks=0
     local duration=paced.seconds or 15
@@ -140,15 +160,19 @@ function love.load()
       end
       local dt=now-previous;previous=now
       local t=love.timer.getTime()
-      loaded.loader.hooks:call('core.update',function(_,hostDt) FixedStep:update(hostDt,1) end,game,dt)
+      loaded.loader.hooks:call('core.update',function(_,hostDt)
+        if paced.hostWorkMs then love.timer.sleep(paced.hostWorkMs/1000) end
+        FixedStep:update(hostDt,1)
+      end,game,dt)
       assert(screen.mode=='playing',screen.error or 'Unexpected pause during paced test')
       draw()
       ticks=ticks+1;times[ticks]=love.timer.getTime()-t
-      local wait=started+ticks/60-love.timer.getTime()
+      local wait=started+ticks/hostHz-love.timer.getTime()
       if wait>0 then love.timer.sleep(wait) end
     until love.timer.getTime()-started>=duration
     local seconds=love.timer.getTime()-started
     local result=snapshot()
+    result.hostHz=hostHz;result.hostWorkMs=paced.hostWorkMs or 0;result.fullRenderer=plan.fullRenderer or false
     result.seconds=seconds;result.frames=screen.console.machine.frames-firstFrame
     result.fps=result.frames/seconds;result.hostTicks=ticks
     result.processingP95Ms=percentile(times,.95)*1000;result.processingMaxMs=percentile(times,1)*1000

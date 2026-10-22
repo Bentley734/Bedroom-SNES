@@ -49,7 +49,12 @@ return function(include)
     include('core/fast_ppu.lua')(machine.ppu,env)
     include('core/fast_sprites.lua')(machine.ppu,env)
     include('core/fast_system.lua')(machine)
-    local data=setmetatable({length=#body},{__index=function(_,i) if type(i)=='number' then return body:byte(i+1) end end})
+    include('core/fast_address.lua')(machine.cpu)
+    include('core/fast_spc_address.lua')(machine.apu.spc)
+    -- CPU instruction fetches are hot: keep decoded cartridge bytes in an
+    -- indexed array rather than calling a string-proxy metamethod per read.
+    local data={length=#body}
+    for i=0,#body-1 do data[i]=body:byte(i+1) end
     machine.cart=env.new(env.Cart,data,h,h.isHirom)
     machine:reset(true)
     return setmetatable({machine=machine,header=h,env=env,frames=0},Console)

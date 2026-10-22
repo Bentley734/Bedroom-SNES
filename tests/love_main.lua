@@ -22,6 +22,7 @@ function love.load()
     local input=require('src.core.Input');input:init()
     local Touch=require('src.core.TouchControls');local visibleBefore=Touch.visible
     local game={stack=stack,input=input,data=r.data,save={version=version,meta={playthroughId='bedroom_snes_test'}}}
+    local delegatedDraws=0;local originalDraw=function() delegatedDraws=delegatedDraws+1 end;game.draw=originalDraw
     local bedroom={screenId='BedroomFixture'};stack:push(bedroom)
     check(not handler(game,bedroom,2,5),'interacting with another bedroom tile is preserved')
     check(handler(game,bedroom,3,5)==true,'interacting with the SNES opens the emulator')
@@ -29,6 +30,7 @@ function love.load()
     check(not Touch:visible(),'the vanilla touch overlay is hidden while the emulator owns the screen')
     check(not Touch:touchpressed('overlay-probe',20,250),'native touch capture yields to the emulator controls')
     check(handler(game,bedroom,3,5) and #stack.states==2,'repeated interaction does not open duplicate screens')
+    game:draw();check(delegatedDraws==1,'cartridge library delegates the normal host draw')
     screenshot(screen,'library')
     local delegated=0
     r.loader.hooks:call('input.key',function() delegated=delegated+1 end,game,{phase='pressed',key='return'})
@@ -61,6 +63,7 @@ function love.load()
     screen:pause();screen:key('backspace')
     check(stack:top()==bedroom and #stack.states==1,'exit returns to the existing bedroom state')
     check(Touch.visible==visibleBefore,'exit restores the vanilla touch overlay')
+    check(game.draw==originalDraw,'exit restores the previous host draw method')
     r.loader.hooks:call('input.key',function() delegated=delegated+1 end,game,{phase='pressed',key='z'})
     check(delegated==1,'normal input resumes after leaving the emulator')
     -- Real per-mod opaque storage, isolated in the SDK filesystem overlay.

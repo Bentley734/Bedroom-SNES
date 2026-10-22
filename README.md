@@ -2,14 +2,14 @@
 
 A **pure-Lua SNES emulator inside Gen1Recomp**, opened by interacting with the SNES in the player's upstairs bedroom in Pallet Town. Supports Pokémon Red, Blue, and Yellow.
 
-**v0.2.1 is an experimental preview.** The included original homebrew cartridge boots and responds to controls. Speed and game compatibility vary; this is not a full-speed, broadly compatible replacement for a standalone emulator. No commercial SNES ROMs are included.
+**v0.2.2 is an experimental preview.** The included original homebrew cartridge boots and responds to controls. Speed and game compatibility vary; this is not a full-speed, broadly compatible replacement for a standalone emulator. No commercial SNES ROMs are included.
 
 ![Bedroom SNES cartridge menu](docs/library.png)
 ![Original homebrew running inside the emulator](docs/playing.png)
 
 ## Install and play
 
-1. Download `Bedroom-SNES-v0.2.1.zip` from [Releases](https://github.com/Bentley734/Bedroom-SNES/releases/latest).
+1. Download `Bedroom-SNES-v0.2.2.zip` from [Releases](https://github.com/Bentley734/Bedroom-SNES/releases/latest).
 2. Import it using Gen1Recomp's mod manager and enable **Bedroom SNES** for Red, Blue, or Yellow. Gen1Recomp **0.3.54 or newer** is required; native loader/graphics tests cover 0.3.54 and 0.3.95.
 3. Go upstairs in the player's house in Pallet Town and interact with the SNES. Select **bedroom-demo** to try the included cartridge.
 4. Read the exit instructions shown **before every cartridge launch**, release the launch button, then confirm to play.
@@ -89,3 +89,15 @@ The SNES state opts out of Pokemon speed multipliers. Audio queues all 534 stere
 v0.2.1 presents the cartridge and menus through the engine composition hook, preserving their RGB colors independently of Pokemon palettes and post-processing. Gameplay uses the largest centered integer scale that fits the window in physical pixels, with nearest-neighbor filtering and black borders. Standard 256-pixel SNES output, horizontal hires and overscan keep their source dimensions. Very small windows that cannot fit even 1x use a reduced fit. There is no on-screen pad, FPS label or pause label. Escape/P pauses, Backspace exits immediately, and tapping/clicking opens the pause menu. The launch instructions still explain exit controls.
 
 Native presentation tests run the real Renderer:endFrame path with forced palettes and an enabled shader path. They check unchanged cartridge RGB, identical menu colors across palette modes, three window sizes, DPI-aware integer placement and resized pause-menu input.
+
+## v0.2.2 performance update
+
+The core now uses indexed cartridge bytes and direct Lua decoders for common 65816/SPC700 address modes. Palette conversion is reused until the actual CGRAM entry or brightness changes; every scanline still checks both. Indexed ROM data increases memory use while a cartridge is loaded.
+
+While a cartridge or its pause menu is topmost, the mod presents directly instead of constructing the unused Pokemon world/UI frame. It restores the previous draw method on exit and keeps the composition-hook fallback. Alternating upload textures reduces sampling/upload contention. Colors, the clean screen and centered integer scaling remain unchanged.
+
+Cartridge timing accrues once per real host frame, independently of Pokemon fixed-step smoothing. The bounded work allowance starts at the first SNES slice and is shared by subsequent catch-up calls. This prevents unrelated host work from consuming the allowance before emulation starts.
+
+In local Windows tests at 1570x1268, Mario World's uncapped native first-level scenes improved from roughly 66–68 FPS in v0.2.1 to 99–101 FPS. All-Stars reached 112–121 FPS and Zombies reached 130–135 FPS in the tested scenes. All three sustained approximately 60 emulated FPS in 15-second paced tests with a 144 Hz host-loop target and an additional simulated 3 ms host delay per update. These controlled fixtures use the production loader, native graphics/audio and the full-size presentation; they are not a benchmark of every enabled mod in a live Pokemon save, every cartridge or other platforms. See `docs/performance-validation.json`.
+
+Additional checks compare 2,784 CPU and 1,280 SPC address-decoder cases against the reference, including address/PC wrapping, cycle penalties and bus-read order. Existing image, instruction, DSP, presentation and exit tests remain in place.

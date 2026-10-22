@@ -15,12 +15,20 @@ return function(screen,loaded,check)
   FX.active=function() return true end
   FX.render=function() shaded=shaded+1 end
   Renderer:init();Renderer:setUISize(320,288)
+  local oldRenderer=screen.game.renderer;screen.game.renderer=Renderer
   local zones={{colors={{255,0,255},{0,255,255},{255,0,0},{0,0,0}},x=0,y=0,w=320,h=288}}
   local function render(mode,w,h)
     width,height=w,h
     target=love.graphics.newCanvas(w,h,{dpiscale=1})
     Palette.setMode(mode)
-    Renderer:beginFrame(false);screen:draw();Renderer:endFrame(zones)
+    Renderer:beginFrame(false)
+    if screen.mode=='playing' then
+      local originalDraw=love.graphics.draw;local draws=0
+      love.graphics.draw=function(...) draws=draws+1;return originalDraw(...) end
+      screen:draw();love.graphics.draw=originalDraw
+      assert(draws==0,'cartridge texture was drawn twice through the UI canvas')
+    else screen:draw() end
+    Renderer:endFrame(zones)
     love.graphics.setCanvas()
     local data=target:newImageData();target:release();return data
   end
@@ -46,6 +54,13 @@ return function(screen,loaded,check)
     a:release();b:release()
   end
   check(shaded==0,'gameplay and menus bypass Pokemon palette and final shader passes')
+  local drawDirect=screen.drawDirect;local directCalls=0
+  screen.drawDirect=function() directCalls=directCalls+1;return true end
+  screen.mode='playing';screen.game:draw()
+  assert(directCalls==1,'cartridge did not bypass the host draw pipeline')
+  screen.mode='paused';screen.game:draw();assert(directCalls==2,'pause did not use direct presentation')
+  screen.drawDirect=drawDirect
+  check(true,'playing and pause bypass the unused host draw pipeline')
   local r=screen:layout({ww=800,wh=600,pw=1200,ph=900,dpiX=1.5,dpiY=1.5,viewX=0,viewY=0},256,224)
   assert(r.scale==4 and r.sx*1.5==4 and r.sy*1.5==4 and r.x*1.5==88 and r.y*1.5==2,'DPI scaling lost whole physical pixels')
   screen.mode='paused'
@@ -60,6 +75,7 @@ return function(screen,loaded,check)
   check(true,'DPI integer layout and resized pause-menu pointer mapping remain correct')
   screen.presentation=nil
   screen.mode='playing'
+  screen.game.renderer=oldRenderer
   View.dimensions,View.pixelDimensions,View.setTarget=oldDimensions,oldPixels,oldTarget
   Palette.setMode(oldMode);FX.active,FX.render=oldActive,oldRender
 end

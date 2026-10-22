@@ -52,7 +52,7 @@ def main():
           local mem={read=function(_,a) if a==32768 then return op else return (a*13+7)%256 end end,
             write=function(_,a,v) writes[#writes+1]={a,v} end}
           local env=console.env;local c=env.new(name=='cpu' and env.Cpu or env.Spc,mem)
-          if fastDispatch then c.cycle=name=='cpu' and console.machine.cpu.cycle or console.machine.apu.spc.cycle end
+          if fastDispatch then c.cycle=name=='cpu' and console.machine.cpu.cycle or console.machine.apu.spc.cycle;c.getAdr=name=='cpu' and console.machine.cpu.getAdr or console.machine.apu.spc.getAdr end
           c.br[name=='cpu' and 4 or 0]=32768
           if name=='cpu' then
             c.br[0]=0x9a5b;c.br[1]=0x11;c.br[2]=0x27;c.br[3]=0x1ff;c.br[5]=0x100

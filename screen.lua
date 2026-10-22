@@ -56,11 +56,12 @@ return function(mod,include)
     if saved and not console:loadRam(saved) then self.notice='Saved cartridge RAM has the wrong size; ignored.' end
     self.imageData=love.image.newImageData(512,240)
     self.image=love.graphics.newImage(self.imageData);self.image:setFilter('nearest','nearest')
+    self.spareImage=love.graphics.newImage(self.imageData);self.spareImage:setFilter('nearest','nearest')
     self.quad=love.graphics.newQuad(0,0,512,224,512,240)
     local audioOk,source=pcall(love.audio.newQueueableSource,32040,16,2,8)
     if audioOk then self.audio=source else self.notice='Audio output is unavailable on this device.' end
     self.musicSong=Music.current();Music.stop()
-    self.mode='playing';self.playTime=0;self.fpsTime=0;self.frameCount=0;self.touch={};self.dirty=true
+    self.mode='playing';self.playTime=0;self.lastHostTime=love.timer.getTime();self.fpsTime=0;self.frameCount=0;self.touch={};self.dirty=true
     self.performance={windowAt=love.timer.getTime(),windowFrames=0,slowWindows=0,warmup=2}
   end
   function Screen:requestLaunch()
@@ -72,14 +73,14 @@ return function(mod,include)
   end
   function Screen:discard()
     self:stopAudio();release(self.audio);self.audio=nil
-    release(self.image);release(self.imageData);release(self.quad);self.image=nil;self.imageData=nil;self.quad=nil;self.console=nil
+    release(self.image);release(self.spareImage);release(self.imageData);release(self.quad);self.image=nil;self.spareImage=nil;self.imageData=nil;self.quad=nil;self.console=nil
   end
   function Screen:pause()
     if self.mode=='playing' then self.mode='paused';self.touch={};self:stopAudio();self:saveRam() end
   end
   function Screen:resume()
     if self.console then
-      self.mode='playing';self.touch={};self.waitRelease=true
+      self.mode='playing';self.touch={};self.waitRelease=true;self.lastHostTime=love.timer.getTime()
       if self.performance then self.performance.windowAt=love.timer.getTime();self.performance.windowFrames=0 end
     end
   end
@@ -203,6 +204,8 @@ return function(mod,include)
       local i=(y+1)*1536+x*3
       return output[i]/255,output[i+1]/255,output[i+2]/255,1
     end)
+    -- Upload into the texture not sampled by the previous presentation.
+    if self.spareImage then self.image,self.spareImage=self.spareImage,self.image end
     self.image:replacePixels(self.imageData)
     if self.audio and self.audio:getFreeBufferCount()>0 then
       local dsp=self.console.machine.apu.dsp
@@ -219,6 +222,15 @@ return function(mod,include)
     self.console.machine.apu.dsp.sampleOffset=0
     self.dirty=false
   end
+  function Screen:beginHostFrame(now)
+    -- The Pokemon fixed-step clock snaps/smooths to the display refresh rate.
+    -- Accrue cartridge time once per real host frame so irregular/high-refresh
+    -- host callbacks cannot slow or accelerate the SNES clock.
+    if self.mode=='playing' and self.lastHostTime then
+      self.playTime=math.min(self.playTime+math.max(0,now-self.lastHostTime),3/60)
+    end
+    self.lastHostTime=now;self.wallDriven=true;self.hostDeadline=nil
+  end
   function Screen:update(dt)
     self.clock=self.clock+dt
     if self.pendingLoad then self.pendingLoad=false;self:loadSelected();self.waitRelease=true;return end
@@ -231,13 +243,14 @@ return function(mod,include)
     if self.mode~='playing' then return end
     local mask=self:buttons();if self.mode~='playing' then return end
     self.console:setButtons(mask)
-    self.playTime=self.playTime+dt
+    if not self.wallDriven then self.playTime=self.playTime+dt end
     if self.playTime<1/60 then return end
     -- Keep a small time debt so occasional expensive frames can catch up.
     -- The shared host deadline still bounds all fixed-step calls together.
     self.playTime=math.min(self.playTime,3/60)
     local start=love.timer.getTime();local completed=0
-    local deadline=math.min(start+self.budget,self.hostDeadline or math.huge)
+    if not self.hostDeadline then self.hostDeadline=start+self.budget end
+    local deadline=math.min(start+self.budget,self.hostDeadline)
     if start>=deadline then return end
     local ok,err=pcall(function()
       repeat
@@ -292,6 +305,14 @@ return function(mod,include)
       y=(ctx.viewY or 0)+math.floor((ph-h*scale)/2)/dy,
       sx=scale/dx,sy=scale/dy,scale=scale,w=w,h=h}
   end
+  function Screen:drawDirect()
+    local View=require('src.render.GameViewport')
+    View.begin(1);View.setTarget()
+    local w,h=View.dimensions();local pw,ph=View.pixelDimensions()
+    self:present({ww=w,wh=h,pw=pw,ph=ph,dpiX=pw/w,dpiY=ph/h})
+    View.finish(self.game)
+    return true
+  end
   function Screen:present(ctx)
     local g=love.graphics
     g.push('all');g.origin();g.setShader();g.setScissor()
@@ -315,6 +336,11 @@ return function(mod,include)
     return true
   end
   function Screen:draw()
+    -- The direct composition hook draws the cartridge and pause overlay once.
+    -- Do not also sample the same live texture into the unused UI canvas.
+    local renderer=self.game.renderer
+    if self.image and self.mode~='library' and self.mode~='instructions'
+      and renderer and renderer.canvas and love.graphics.getCanvas()==renderer.canvas then return end
     local g=love.graphics;g.push('all');g.origin();g.setShader();color('bg');g.rectangle('fill',0,0,W,H)
     if self.mode=='instructions' then
       text(self.small,'BEFORE YOU PLAY',16,14,'mint')

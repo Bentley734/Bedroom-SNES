@@ -42,6 +42,20 @@ local ok,problem=xpcall(function()
     for i=1,8 do s:update(1/60) end
     assert(now-start<s.budget+.050/12+.0005+1e-9,'catch-up steps multiplied the host allowance')
   end
+  now=0;local delayed=fixture(.012)
+  for tick=1,60 do
+    now=tick/60+.008;delayed.hostDeadline=nil
+    delayed:update(1/60)
+  end
+  assert(delayed.frameCount==60,'unrelated host work consumed the SNES allowance')
+  now=0;local wall=fixture(.004);wall.lastHostTime=0
+  for tick=1,60 do
+    now=tick/60;wall:beginHostFrame(now);wall:update(1/120)
+  end
+  assert(wall.frameCount>=59 and wall.frameCount<=60,'host logic dt changed the cartridge clock')
+  wall:beginHostFrame(now);wall:update(1/60)
+  assert(wall.frameCount<=60,'duplicate callbacks accelerated the cartridge clock')
+  print('PASS: cartridge follows wall time when host logic runs at a different rate')
   local queued
   love.sound={newSoundData=function(count,rate,bits,channels)
     assert(count==534 and rate==32040 and bits==16 and channels==2)
@@ -58,6 +72,11 @@ local ok,problem=xpcall(function()
   assert(queued[1067]==533/1024*.55 and queued[1068]==-533/1024*.55,'last stereo sample lost')
   assert(dsp.sampleOffset==0 and playCalls==0,'audio started without jitter buffer')
   audioScreen:video();assert(playCalls==1,'two complete audio frames must start playback')
+  local front,back=audioScreen.image,{replacePixels=function() end}
+  audioScreen.spareImage=back
+  audioScreen:video();assert(audioScreen.image==back and audioScreen.spareImage==front)
+  audioScreen:video();assert(audioScreen.image==front and audioScreen.spareImage==back)
+  print('PASS: shared timing survives 8 ms host work; video uploads alternate textures')
   print('PASS: audio queues all 534 stereo samples including the capped last cursor; clock is fixed-speed')
   print('PASS: frontend scheduling completes 12 ms frames at 60 Hz; shared deadline bounds catch-up work')
 end,debug.traceback)

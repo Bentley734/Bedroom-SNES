@@ -8,6 +8,7 @@ return function(ppu,R)
   local pixels,ranks,layers={},{},{}
   local subPixels,subRanks,subLayers={},{},{}
   local rankFor,red,green,blue={},{},{},{}
+  local previousColors,previousBrightness={},nil
   local spread={}
   for byte=0,255 do
     local value,weight,n=0,1,byte
@@ -108,12 +109,17 @@ return function(ppu,R)
     if p.preventMath==3 or (p.preventMath==1 and not p.window1Enabled[5] and not p.window2Enabled[5]) then anyMath=false end
     if anyMath and p.addSub then compose(p,line,p.subScreenEnabled,p.subScreenWindow,subPixels,subRanks,subLayers) end
     local mult=p.brightnessMults[p.brightness]
+    local brightnessChanged=mult~=previousBrightness
     for i=0,255 do
       local color=p.cgram[i]
-      red[i]=floor(band(color,31)*mult)%256
-      green[i]=floor(band(rshift(color,5),31)*mult)%256
-      blue[i]=floor(band(rshift(color,10),31)*mult)%256
+      if brightnessChanged or previousColors[i]~=color then
+        red[i]=floor(band(color,31)*mult)%256
+        green[i]=floor(band(rshift(color,5),31)*mult)%256
+        blue[i]=floor(band(rshift(color,10),31)*mult)%256
+        previousColors[i]=color
+      end
     end
+    previousBrightness=mult
     local out,row=p.pixelOutput,line*1536
     for x=0,255 do
       local color=pixels[x];local layer=layers[x]

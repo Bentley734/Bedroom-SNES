@@ -21,8 +21,12 @@ for backend in ['lua51','lua54','luajit21']:
       local env=c.env
       local fast,reference=env.new(env.Ppu,{}),env.new(env.Ppu,{})
       include('core/fast_ppu.lua')(fast,env)
+      for mode=0,7 do
       for _,p in ipairs({fast,reference}) do
-        p.mode=1;p.forcedBlank=false;p.pseudoHires=true;p.brightness=11
+        p.mode=mode;p.forcedBlank=false;p.pseudoHires=true;p.brightness=11
+        p.directColor=true;p.interlace=true;p.evenFrame=true;p.mode7ExBg=true
+        p.mode7A=181;p.mode7B=-181;p.mode7C=181;p.mode7D=181
+        p.mode7X=128;p.mode7Y=128;p.mode7Hoff=64;p.mode7Voff=32
         p.mainScreenEnabled[0]=true;p.subScreenEnabled[0]=true
         p.mosaicEnabled[0]=true;p.mosaicSize=7;p.mathEnabled[0]=true
         p.addSub=true;p.halfColors=true;p.cgram[0]=12345
@@ -32,6 +36,7 @@ for backend in ['lua51','lua54','luajit21']:
         p:renderLine(1)
       end
       for i=1536,3071 do assert(fast.pixelOutput[i]==reference.pixelOutput[i],'portable effects mismatch') end
+      end
     ''')
     if backend=='luajit21':lua.execute(b'jit.off();c:frame();assert(c.machine.frames==1)')
-    print('PASS:',backend,'compiles and initializes; bit semantics and effects pixels match'+('; one full frame with JIT disabled' if backend=='luajit21' else ''))
+    print('PASS:',backend,'compiles and initializes; bit semantics and all-mode effects pixels match'+('; one full frame with JIT disabled' if backend=='luajit21' else ''))

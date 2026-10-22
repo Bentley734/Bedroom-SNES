@@ -47,6 +47,7 @@ def main():
     ''')
     print(f'10 emulated frames: {time.perf_counter()-start:.3f}s')
     lua.execute((ROOT/'tests/fast_ppu.lua').read_bytes())
+    lua.execute((ROOT/'tests/ppu_modes.lua').read_bytes())
     lua.execute((ROOT/'tests/fast_sprites.lua').read_bytes())
     lua.execute((ROOT/'tests/frontend_timing.lua').read_bytes())
     lua.execute((ROOT/'tests/scheduler.lua').read_bytes())

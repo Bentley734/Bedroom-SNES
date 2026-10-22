@@ -2,14 +2,14 @@
 
 A **pure-Lua SNES emulator inside Gen1Recomp**, opened by interacting with the SNES in the player's upstairs bedroom in Pallet Town. Supports Pokémon Red, Blue, and Yellow.
 
-**v0.2.3 is an experimental preview.** The included original homebrew cartridge boots and responds to controls. Speed and game compatibility vary; this is not a full-speed, broadly compatible replacement for a standalone emulator. No commercial SNES ROMs are included.
+**v0.2.4 is an experimental preview.** The included original homebrew cartridge boots and responds to controls. Speed and game compatibility vary; this is not a full-speed, broadly compatible replacement for a standalone emulator. No commercial SNES ROMs are included.
 
 ![Bedroom SNES cartridge menu](docs/library.png)
 ![Original homebrew running inside the emulator](docs/playing.png)
 
 ## Install and play
 
-1. Download `Bedroom-SNES-v0.2.3.zip` from [Releases](https://github.com/Bentley734/Bedroom-SNES/releases/latest).
+1. Download `Bedroom-SNES-v0.2.4.zip` from [Releases](https://github.com/Bentley734/Bedroom-SNES/releases/latest).
 2. Import it using Gen1Recomp's mod manager and enable **Bedroom SNES** for Red, Blue, or Yellow. Gen1Recomp **0.3.54 or newer** is required; native loader/graphics tests cover 0.3.54 and 0.3.95.
 3. Go upstairs in the player's house in Pallet Town and interact with the SNES. Select **bedroom-demo** to try the included cartridge.
 4. Read the exit instructions shown **before every cartridge launch**, release the launch button, then confirm to play.
@@ -56,7 +56,7 @@ Battery-backed cartridge RAM saves automatically about every 30 seconds of activ
 
 ## Validation and development
 
-`tests/run.py` covers original-demo boot/input, cartridge validation, SRAM, 2,416 PPU scanlines (including windows, subscreen math, all mosaic sizes and pseudo-hires), 1,664 sprite scanlines, 60 scheduler frames, 1,728 partial scheduler/state comparisons, frame pacing, and the complete 534-sample stereo audio queue. `tests/differential.py` checks both reference and optimized CPU/SPC dispatch against all 2,048 opcode/flag cases, six full machine/frame snapshots and 512 audible stereo DSP samples. Private-ROM runs render every frame and match 21 Mario World, 23 All-Stars and 18 Zombies checkpoints for image hashes, CPU/SPC positions and audio peaks. These establish agreement with SnesJs, not physical-hardware accuracy.
+`tests/run.py` covers original-demo boot/input, cartridge validation, SRAM, 5,232 PPU scanlines (including all eight graphics modes, windows, subscreen math, mosaic, direct color, per-tile scrolling, hires/interlace and Mode 7), 1,664 sprite scanlines, 60 scheduler frames, 1,728 partial scheduler/state comparisons, frame pacing, and the complete 534-sample stereo audio queue. `tests/differential.py` checks both reference and optimized CPU/SPC dispatch against all 2,048 opcode/flag cases, six full machine/frame snapshots and 512 audible stereo DSP samples. Private-ROM runs render every frame and match 21 Mario World, 23 All-Stars and 18 Zombies checkpoints for image hashes, CPU/SPC positions and audio peaks. These establish agreement with SnesJs, not physical-hardware accuracy.
 
 `tests/love_main.lua` exercises the production mod loader and sandbox, bedroom MapScripts, native graphics/audio, raw input capture, tap-to-pause and resized pointer routing, pause/resume, repeat entry/exit, storage, save-failure handling and restoration of normal input/touch controls. Native fixtures do not launch a user's save file.
 
@@ -76,11 +76,11 @@ python tools/build_demo.py
 python tools/package_release.py
 ```
 
-The source translator intentionally handles only this core's JavaScript subset and fails on unsupported syntax. It preserves 32-bit bitwise semantics, typed-array wrapping, zero-based indexing, switch fallthrough, default arguments and JavaScript truthiness. Numeric bit operands use LuaJIT's standard bit functions directly; source expressions requiring boolean coercion or truncation keep explicit conversions. Explicit typed writes, multiple color/address return values and a tested batched Mode 1 renderer reduce Lua overhead. CPU, DMA and HDMA countdowns stop at PPU/IRQ/refresh event boundaries. The hot clock and sprite loops use direct Lua dispatch. SPC faults propagate to the frontend's error screen instead of being silently swallowed.
+The source translator intentionally handles only this core's JavaScript subset and fails on unsupported syntax. It preserves 32-bit bitwise semantics, typed-array wrapping, zero-based indexing, switch fallthrough, default arguments and JavaScript truthiness. Numeric bit operands use LuaJIT's standard bit functions directly; source expressions requiring boolean coercion or truncation keep explicit conversions. Explicit typed writes, multiple color/address return values and tested all-mode native Lua rendering reduce Lua overhead. CPU, DMA and HDMA countdowns stop at PPU/IRQ/refresh event boundaries. The hot clock and sprite loops use direct Lua dispatch. SPC faults propagate to the frontend's error screen instead of being silently swallowed.
 
 See [THIRD_PARTY.txt](THIRD_PARTY.txt) and [LICENSE](LICENSE). The original demo source and generated cartridge are also MIT-licensed.
 
-The optimized Mode 1 renderer packs tile bitplanes once per tile row, resolves background/sprite priority with reusable buffers, and supports window masks, clipping, fixed-color and main/subscreen math. All mosaic sizes and pseudo-hires stay on this path. Other graphics modes, including Modes 5/6 and Mode 7, use the reference renderer. Palette conversion is refreshed every scanline; sprite overflow and interlace behavior remain reference-compatible. No Snes9x-Z code was copied; batching and redundant-work removal inspired the optimization. The mod remains single-threaded with no new permissions.
+The optimized Mode 1 renderer packs tile bitplanes once per tile row, resolves background/sprite priority with reusable buffers, and supports window masks, clipping, fixed-color and main/subscreen math. As of v0.2.4, all eight background modes use the fast renderer for visible scanlines. Modes 0/1/3 use batched composition; the other modes use packed tile decoding and preserve per-pixel main/subscreen fetch order. The reference handles pre-render and vertical-blank bookkeeping only. Palette conversion is refreshed every scanline; sprite overflow and interlace behavior remain reference-compatible. No Snes9x-Z code was copied; batching and redundant-work removal inspired the optimization. The mod remains single-threaded with no new permissions.
 
 The SNES state opts out of Pokemon speed multipliers. Audio queues all 534 stereo samples per 60 Hz frame and buffers two frames before playback to absorb ordinary timing jitter. Low-performance devices can still stutter; this does not add the upstream core's missing DSP echo.
 
@@ -109,3 +109,13 @@ Mode 1 mosaic and pseudo-hires now use the batched renderer instead of falling b
 Local synthetic PPU-only benchmarks measured about **1.8x** the previous throughput for identical-screen transparency, **2.2x** for static window math, **1.7x** for changing window bounds, and **3.0-3.1x** for mosaic/pseudo-hires. Different-layer transparency improved about **7%**; opaque and fixed-color rendering stayed within **2%** of v0.2.2. These are renderer measurements, not whole-game FPS. Mario World's native first-level test measured roughly **108-111 uncapped FPS**, and **60 FPS** in the 15-second paced fixture. Actual effects scenes and enabled mods can still run slower. See `docs/effects-validation.json` for timings and scope.
 
 The new tests compare 640 additional effects scanlines against the reference, including raster changes to palettes, VRAM, brightness and window registers. Portable Lua 5.1/5.4 and LuaJIT also compare effects output. These checks preserve SnesJs behavior; they do not establish hardware accuracy or fix its remaining timing, Mode 7, interlace and DSP limitations. No frame skipping or effects removal is used.
+
+## v0.2.4 all-mode renderer
+
+All eight SNES background modes now render visible scanlines through optimized Lua, including forced blanking. Modes 0/1/3 batch background composition. Modes 2/4/6 preserve the reference's per-tile offset state and main/subscreen ordering, including the first scrolling tile and masked/occluded pixels. Modes 5/6 keep odd/even horizontal samples and interlace field selection. Mode 7 has native Lua affine-coordinate generation, map wrapping, large-field transparency/fill and extended-background priority. Packed 2/4/8bpp tile rows and direct-color channels feed the shared window, clipping, brightness and blend pipeline. The narrow Mode 1 loop remains specialized to preserve its performance.
+
+Validation adds **2,816** byte-for-byte all-mode scanline comparisons, **320** raster scanlines compared directly with pinned upstream JavaScript (pixels, affine coordinates, scrolling state and sprite overflow), and all-mode effects checks on Lua 5.1/5.4 and LuaJIT. Tests assert visible lines never call the reference renderer or its color/tile/affine helpers. Native fixtures also compare each mode inside the production sandbox on both tested engine versions and all three Pokemon games. Existing cartridge checkpoints, audio, presentation, input, save and exit checks remain in place.
+
+Synthetic PPU-only benchmarks show roughly **1.5x** throughput for ordinary Mode 0 and **2.3x** for Mode 3; the other ordinary modes range from approximately unchanged to **1.4x**. The combined raster-window/mosaic/blend fixtures improve much more because they previously hit especially slow reference paths. These deliberately demanding synthetic cases are not whole-game or live-save FPS measurements. See `docs/modes-validation.json` for all measurements and limitations.
+
+Output is checked against SnesJs, not physical SNES hardware. Its approximate timing, Mode 7/scrolling edge cases, single-field interlace presentation and missing DSP echo remain. No frames or effects are skipped, and Super FX cartridges such as Yoshi's Island remain unsupported.

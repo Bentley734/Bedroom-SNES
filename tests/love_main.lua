@@ -47,6 +47,7 @@ function love.load()
     for i=1,4 do screen.console:frame() end
     screen:video();screenshot(screen,'playing')
     assert(loadstring(love.filesystem.read('mods/bedroom_snes/tests/presentation.lua')))()(screen,r,check)
+    assert(loadstring(love.filesystem.read('mods/bedroom_snes/tests/native_ppu.lua')))()(screen,check)
     check(screen.console.machine.ppu.forcedBlank==false,'SNES graphics render to a real LÖVE texture')
     screen:pause();check(screen.mode=='paused','pause stops emulator updates')
     screenshot(screen,'paused')

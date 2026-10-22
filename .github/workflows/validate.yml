@@ -23,4 +23,7 @@ jobs:
       - run: python tests/differential.py
         env:
           SNESJS_SOURCE: /tmp/snesjs
+      - run: python tests/ppu_differential.py
+        env:
+          SNESJS_SOURCE: /tmp/snesjs
       - run: python tools/package_release.py

@@ -43,7 +43,7 @@ for trial=1,96 do
     array('tilemapWider',i,rand(2)==0);array('tilemapHigher',i,rand(2)==0)
     array('tilemapAdr',i,rand(32)*1024);array('tileAdr',i,rand(8)*4096)
   end
-  -- Also exercise explicit fallback paths.
+  -- Also exercise mosaic, pseudo-hires and window paths.
   both('addSub',trial%13==0);both('pseudoHires',trial%17==0);both('mosaicSize',trial%4+1)
   array('mosaicEnabled',0,trial%19==0);array('mainScreenWindow',1,trial%23==0)
   for _,line in ipairs({0,1,2,7,31,127,223,224,225}) do

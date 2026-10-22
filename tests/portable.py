@@ -18,6 +18,20 @@ for backend in ['lua51','lua54','luajit21']:
       assert(R.band(3.9,255)==3 and R.bor(false,true)==1)
       Console=include('core/console.lua')(include);c=assert(Console.new(demo))
       assert(c.header.name=='BEDROOM SNES DEMO')
+      local env=c.env
+      local fast,reference=env.new(env.Ppu,{}),env.new(env.Ppu,{})
+      include('core/fast_ppu.lua')(fast,env)
+      for _,p in ipairs({fast,reference}) do
+        p.mode=1;p.forcedBlank=false;p.pseudoHires=true;p.brightness=11
+        p.mainScreenEnabled[0]=true;p.subScreenEnabled[0]=true
+        p.mosaicEnabled[0]=true;p.mosaicSize=7;p.mathEnabled[0]=true
+        p.addSub=true;p.halfColors=true;p.cgram[0]=12345
+        p.window1Enabled[5]=true;p.window1Left=73;p.window1Right=219;p.colorClip=2
+        for i=0,32767 do p.vram[i]=(i*177+63)%65536 end
+        for i=1,255 do p.cgram[i]=(i*97)%32768 end
+        p:renderLine(1)
+      end
+      for i=1536,3071 do assert(fast.pixelOutput[i]==reference.pixelOutput[i],'portable effects mismatch') end
     ''')
     if backend=='luajit21':lua.execute(b'jit.off();c:frame();assert(c.machine.frames==1)')
-    print('PASS:',backend,'compiles and initializes; bit semantics match'+('; one full frame with JIT disabled' if backend=='luajit21' else ''))
+    print('PASS:',backend,'compiles and initializes; bit semantics and effects pixels match'+('; one full frame with JIT disabled' if backend=='luajit21' else ''))

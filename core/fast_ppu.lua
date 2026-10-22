@@ -1,5 +1,5 @@
 -- Batched low-resolution Mode 1 renderer. Windows and main/subscreen color
--- math follow SnesJs; other modes and mosaic retain the reference renderer.
+-- math, mosaic and pseudo-hires follow SnesJs; other modes retain the reference.
 return function(ppu,R)
   local original=ppu.renderLine
   local band,rshift=R.band,R.rshift
@@ -8,7 +8,29 @@ return function(ppu,R)
   local pixels,ranks,layers={},{},{}
   local subPixels,subRanks,subLayers={},{},{}
   local rankFor,red,green,blue={},{},{},{}
+  local rawRed,rawGreen,rawBlue={},{},{}
+  -- Cache the 5-bit channel operation, including brightness, rather than doing
+  -- three clamps, divisions and brightness conversions for every blended pixel.
+  -- Tables are bounded by the sixteen brightness values and four operations.
+  local blends={}
+  local function blendTable(brightness,mult,subtract,half)
+    local key=brightness*4+(subtract and 2 or 0)+(half and 1 or 0)
+    local result=blends[key]
+    if not result then
+      result={}
+      for a=0,31 do for b=0,31 do
+        local value=a+(subtract and -b or b)
+        if half then value=floor(value/2) end
+        result[a*32+b]=floor(max(0,min(31,value))*mult)%256
+      end end
+      blends[key]=result
+    end
+    return result
+  end
   local previousColors,previousBrightness={},nil
+  local windowStates,windowCache={},{}
+  local windowGeneration=0
+  local previousLeft1,previousRight1,previousLeft2,previousRight2
   local spread={}
   for byte=0,255 do
     local value,weight,n=0,1,byte
@@ -27,6 +49,25 @@ return function(ppu,R)
     local logic=p.windowMaskLogic[l]
     if logic==0 then return w1 or w2 elseif logic==1 then return w1 and w2
     elseif logic==2 then return w1~=w2 else return w1==w2 end
+  end
+  local function prepareWindows(p)
+    local changed=previousLeft1~=p.window1Left or previousRight1~=p.window1Right
+      or previousLeft2~=p.window2Left or previousRight2~=p.window2Right
+    if changed then windowGeneration=windowGeneration+1 end
+    for l=0,5 do
+      local key=(p.window1Enabled[l] and 1 or 0)+(p.window2Enabled[l] and 2 or 0)
+        +(p.window1Inversed[l] and 4 or 0)+(p.window2Inversed[l] and 8 or 0)+p.windowMaskLogic[l]*16
+      if not p.window1Enabled[l] and not p.window2Enabled[l] then key=0 end
+      local entry=windowCache[key]
+      if not entry then entry={states={}};windowCache[key]=entry end
+      if entry.generation~=windowGeneration and (key~=0 or not entry.generation) then
+        for x=0,255 do entry.states[x]=window(p,x,l) end
+        entry.generation=windowGeneration
+      end
+      windowStates[l]=entry.states
+    end
+    previousLeft1=p.window1Left;previousRight1=p.window1Right
+    previousLeft2=p.window2Left;previousRight2=p.window2Right
   end
   local function fetch(p,sx,sy,l,four)
     local x,y=sx,sy
@@ -56,22 +97,28 @@ return function(ppu,R)
     for x=0,255 do out[x]=0;depth[x]=100;layerOut[x]=5 end
     if enabled[4] then
       local mask=windows[4] and (p.window1Enabled[4] or p.window2Enabled[4])
+      local size=p.mosaicEnabled[4] and p.mosaicSize or 1
       for x=0,255 do
-        local pixel=p.spriteLineBuffer[x]
-        if pixel~=0 and not (mask and window(p,x,4)) then
-          out[x]=pixel;depth[x]=rankFor[16+p.spritePrioBuffer[x]];layerOut[x]=4
+        local sx=x
+        if size>1 then sx=x-x%size end
+        local pixel=p.spriteLineBuffer[sx]
+        if pixel~=0 and not (mask and windowStates[4][x]) then
+          out[x]=pixel;depth[x]=rankFor[16+p.spritePrioBuffer[sx]];layerOut[x]=4
         end
       end
     end
     for layer=0,2 do
       if enabled[layer] then
         local sy=line+p.bgVoff[layer]
+        local size=p.mosaicEnabled[layer] and p.mosaicSize or 1
+        if size>1 then sy=line-R.rem(line-p.mosaicStartLine,size)+p.bgVoff[layer] end
         local sxStart=p.bgHoff[layer]
         local mask=windows[layer] and (p.window1Enabled[layer] or p.window2Enabled[layer])
         local palette,flip,rank,packed,lastTile
         local four=layer<2
         for x=0,255 do
           local sx=x+sxStart
+          if size>1 then sx=x-x%size+sxStart end
           local tx=floor(sx/8)
           if tx~=lastTile then
             local word,a,b
@@ -82,7 +129,7 @@ return function(ppu,R)
             palette=band(rshift(word,10),7)*(four and 16 or 4)
             rank=rankFor[layer*4+band(rshift(word,13),1)]
           end
-          if rank<depth[x] and not (mask and window(p,x,layer)) then
+          if rank<depth[x] and not (mask and windowStates[layer][x]) then
             local shift=flip and sx%8 or 7-sx%8
             local pixel=band(rshift(packed,shift*4),15)
             if pixel~=0 then out[x]=palette+pixel;depth[x]=rank;layerOut[x]=layer end
@@ -92,10 +139,7 @@ return function(ppu,R)
     end
   end
   ppu.renderLine=function(p,line)
-    local eligible=p.mode==1 and not p.forcedBlank and not p.pseudoHires
-    for i=0,4 do
-      if (p.mainScreenEnabled[i] or p.subScreenEnabled[i]) and p.mosaicEnabled[i] and p.mosaicSize>1 then eligible=false end
-    end
+    local eligible=p.mode==1 and not p.forcedBlank
     if not eligible or line<1 or line>=(p.frameOverscan and 240 or 225) then return original(p,line) end
     if line==1 then p.mosaicStartLine=1 end
     for i=0,3 do p.lastTileFetchedX[i]=-1;p.lastTileFetchedY[i]=-1 end
@@ -103,47 +147,65 @@ return function(ppu,R)
     p.lastOrigTileX[0]=-1;p.lastOrigTileX[1]=-1
     local modeIndex=p.layer3Prio and 96 or 12
     for j=0,9 do rankFor[p.layersPerMode[modeIndex+j]*4+p.prioPerMode[modeIndex+j]]=j end
+    prepareWindows(p)
     compose(p,line,p.mainScreenEnabled,p.mainScreenWindow,pixels,ranks,layers)
     local anyMath=false
     for i=0,5 do if p.mathEnabled[i] then anyMath=true end end
     if p.preventMath==3 or (p.preventMath==1 and not p.window1Enabled[5] and not p.window2Enabled[5]) then anyMath=false end
-    if anyMath and p.addSub then compose(p,line,p.subScreenEnabled,p.subScreenWindow,subPixels,subRanks,subLayers) end
+    local secondPixels,secondLayers=subPixels,subLayers
+    if p.pseudoHires or (anyMath and p.addSub) then
+      -- Some effects select the same layers on both screens. Their source
+      -- composition is identical even though the final color math differs.
+      local same=true
+      for l=0,4 do
+        if p.mainScreenEnabled[l]~=p.subScreenEnabled[l] or
+          (p.mainScreenEnabled[l] and p.mainScreenWindow[l]~=p.subScreenWindow[l]
+            and (p.window1Enabled[l] or p.window2Enabled[l])) then same=false;break end
+      end
+      if same then secondPixels=pixels;secondLayers=layers
+      else compose(p,line,p.subScreenEnabled,p.subScreenWindow,subPixels,subRanks,subLayers) end
+    end
     local mult=p.brightnessMults[p.brightness]
     local brightnessChanged=mult~=previousBrightness
     for i=0,255 do
       local color=p.cgram[i]
       if brightnessChanged or previousColors[i]~=color then
-        red[i]=floor(band(color,31)*mult)%256
-        green[i]=floor(band(rshift(color,5),31)*mult)%256
-        blue[i]=floor(band(rshift(color,10),31)*mult)%256
+        rawRed[i]=band(color,31);rawGreen[i]=band(rshift(color,5),31);rawBlue[i]=band(rshift(color,10),31)
+        red[i]=floor(rawRed[i]*mult)%256
+        green[i]=floor(rawGreen[i]*mult)%256
+        blue[i]=floor(rawBlue[i]*mult)%256
         previousColors[i]=color
       end
     end
     previousBrightness=mult
+    local fullBlend,halfBlend
+    if anyMath then
+      fullBlend=blendTable(p.brightness,mult,p.subtractColors,false)
+      halfBlend=p.halfColors and blendTable(p.brightness,mult,p.subtractColors,true) or fullBlend
+    end
     local out,row=p.pixelOutput,line*1536
     for x=0,255 do
       local color=pixels[x];local layer=layers[x]
       local r,g,b=red[color],green[color],blue[color]
       local inWindow=false
-      if p.colorClip==1 or p.colorClip==2 or (anyMath and (p.preventMath==1 or p.preventMath==2)) then inWindow=window(p,x,5) end
+      if p.colorClip==1 or p.colorClip==2 or (anyMath and (p.preventMath==1 or p.preventMath==2)) then inWindow=windowStates[5][x] end
       local clip=p.colorClip==3 or (p.colorClip==2 and inWindow) or (p.colorClip==1 and not inWindow)
       local mathOn=anyMath and p.mathEnabled[layer] and (layer~=4 or color>=192)
         and not (p.preventMath==2 and inWindow) and not (p.preventMath==1 and not inWindow)
       if mathOn then
-        local raw=p.cgram[color]
-        r=clip and 0 or band(raw,31);g=clip and 0 or band(rshift(raw,5),31);b=clip and 0 or band(rshift(raw,10),31)
-        local useSub=p.addSub and subLayers[x]<5
+        r=clip and 0 or rawRed[color];g=clip and 0 or rawGreen[color];b=clip and 0 or rawBlue[color]
+        local useSub=p.addSub and secondLayers[x]<5
         local r1,g1,b1=p.fixedColorR,p.fixedColorG,p.fixedColorB
-        if useSub then local second=p.cgram[subPixels[x]];r1=band(second,31);g1=band(rshift(second,5),31);b1=band(rshift(second,10),31) end
-        local sign=p.subtractColors and -1 or 1
-        r=r+sign*r1;g=g+sign*g1;b=b+sign*b1
-        if p.halfColors and (useSub or not p.addSub) then r=floor(r/2);g=floor(g/2);b=floor(b/2) end
-        r=floor(max(0,min(31,r))*mult)%256
-        g=floor(max(0,min(31,g))*mult)%256
-        b=floor(max(0,min(31,b))*mult)%256
+        if useSub then local second=secondPixels[x];r1=rawRed[second];g1=rawGreen[second];b1=rawBlue[second] end
+        local blend=(useSub or not p.addSub) and halfBlend or fullBlend
+        r=blend[r*32+r1];g=blend[g*32+g1];b=blend[b*32+b1]
       elseif clip then r=0;g=0;b=0 end
       local i=row+x*6
-      out[i]=r;out[i+1]=g;out[i+2]=b;out[i+3]=r;out[i+4]=g;out[i+5]=b
+      if p.pseudoHires then
+        local second=secondPixels[x]
+        out[i]=red[second];out[i+1]=green[second];out[i+2]=blue[second]
+      else out[i]=r;out[i+1]=g;out[i+2]=b end
+      out[i+3]=r;out[i+4]=g;out[i+5]=b
     end
     R.clearArray(p.spriteLineBuffer)
     p:evaluateSprites(line)

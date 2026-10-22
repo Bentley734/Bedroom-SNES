@@ -1,0 +1,293 @@
+{
+  "version": "0.2.3",
+  "testedAt": "2026-10-22T13:19:15.773211+00:00",
+  "benchmark": "Synthetic Mode 1 PPU-only, Windows x64 LuaJIT 2.1; median of five 40-frame runs per case after four warmup frames. Excludes CPU/APU, uploads and host drawing.",
+  "command": "python tests/benchmark_effects.py [previous-release-fast_ppu.lua]",
+  "renderer": {
+    "opaque": {
+      "v022": {
+        "medianPpuFps": 617.19,
+        "samples": [
+          598.2247680003742,
+          614.9758929450819,
+          618.2896254098147,
+          618.3546201911189,
+          617.1868008429742
+        ]
+      },
+      "v023": {
+        "medianPpuFps": 609.13,
+        "samples": [
+          609.1293257698129,
+          601.9853476766896,
+          609.5135929136671,
+          604.4432624214934,
+          609.9439156567398
+        ]
+      },
+      "throughputRatio": 0.9869408123916459
+    },
+    "fixed_color": {
+      "v022": {
+        "medianPpuFps": 520.52,
+        "samples": [
+          509.5541401268926,
+          520.515466466685,
+          521.2432694470809,
+          521.1706012878382,
+          520.0721860188588
+        ]
+      },
+      "v023": {
+        "medianPpuFps": 516.91,
+        "samples": [
+          518.0897512778387,
+          519.6114345702921,
+          516.9080627320583,
+          515.9878846038572,
+          516.308241183692
+        ]
+      },
+      "throughputRatio": 0.9930646276800122
+    },
+    "transparency": {
+      "v022": {
+        "medianPpuFps": 289.12,
+        "samples": [
+          288.0702891502442,
+          289.6313427455943,
+          289.11907585964474,
+          290.6700016205841,
+          288.82555586291164
+        ]
+      },
+      "v023": {
+        "medianPpuFps": 523.7,
+        "samples": [
+          521.5688268737904,
+          527.3621870765089,
+          524.9433389278224,
+          517.6820784931313,
+          523.7034738549198
+        ]
+      },
+      "throughputRatio": 1.8113586054233537
+    },
+    "split_transparency": {
+      "v022": {
+        "medianPpuFps": 402.76,
+        "samples": [
+          404.0122456104432,
+          401.23661123644905,
+          400.2934150733726,
+          403.4515278206437,
+          402.76133168950196
+        ]
+      },
+      "v023": {
+        "medianPpuFps": 429.96,
+        "samples": [
+          427.4020260990544,
+          428.71581393344064,
+          429.96420547938544,
+          431.61725907998465,
+          431.06653404136085
+        ]
+      },
+      "throughputRatio": 1.0675340152944681
+    },
+    "window_math": {
+      "v022": {
+        "medianPpuFps": 213.29,
+        "samples": [
+          213.29283613345984,
+          212.71266613529738,
+          213.51952235668193,
+          213.78301878725705,
+          213.2301867841984
+        ]
+      },
+      "v023": {
+        "medianPpuFps": 469.29,
+        "samples": [
+          469.29023371776856,
+          470.22809589451157,
+          472.0309841128539,
+          468.60905118423096,
+          466.2961166860982
+        ]
+      },
+      "throughputRatio": 2.200243799521778
+    },
+    "raster_windows": {
+      "v022": {
+        "medianPpuFps": 216.16,
+        "samples": [
+          216.4330001890328,
+          216.15580943051762,
+          216.52121853823263,
+          214.3635359053089,
+          215.4222977159044
+        ]
+      },
+      "v023": {
+        "medianPpuFps": 359.79,
+        "samples": [
+          355.15178743453083,
+          358.55466614023925,
+          359.7853520586775,
+          361.3829765131185,
+          360.5952345535234
+        ]
+      },
+      "throughputRatio": 1.6644615099925981
+    },
+    "mosaic": {
+      "v022": {
+        "medianPpuFps": 154.5,
+        "samples": [
+          154.4477873809429,
+          153.932119014107,
+          154.89239238273456,
+          154.50434234458788,
+          155.15687135479027
+        ]
+      },
+      "v023": {
+        "medianPpuFps": 468.7,
+        "samples": [
+          464.94219606098505,
+          468.6985530093874,
+          466.9013624182908,
+          469.57064807816226,
+          471.13752622123013
+        ]
+      },
+      "throughputRatio": 3.0336569579288026
+    },
+    "pseudo_hires": {
+      "v022": {
+        "medianPpuFps": 153.82,
+        "samples": [
+          152.52243509685107,
+          153.52823230658774,
+          153.82101002730957,
+          154.01432564257212,
+          154.16658315969173
+        ]
+      },
+      "v023": {
+        "medianPpuFps": 481.05,
+        "samples": [
+          479.03790028073865,
+          472.94237551860056,
+          481.05022885887445,
+          481.51175430444243,
+          481.43235754976206
+        ]
+      },
+      "throughputRatio": 3.1273566506306074
+    }
+  },
+  "referenceGames": {
+    "smw": {
+      "checkpointsMatched": 21,
+      "lastReferenceFrame": 2741
+    },
+    "allstars": {
+      "checkpointsMatched": 23,
+      "lastReferenceFrame": 2743
+    },
+    "zombies": {
+      "checkpointsMatched": 18,
+      "lastReferenceFrame": 3008
+    }
+  },
+  "nativeSMW": {
+    "preloadSkippedVideo": true,
+    "benchmark": [
+      {
+        "seconds": 5.489486900000001,
+        "fps": 109.2998327402876,
+        "processingP95Ms": 10.502300000002407,
+        "processingMaxMs": 12.239199999999784,
+        "includes": "Console frame, audio sampling/queue, texture upload and draw; uncapped, no display synchronization",
+        "ppuMode": 1,
+        "pixelSha256": "3b01645d106b7c55865d022a68b2d391d1396b8759b2ea4a575ce1e5d6dd4078",
+        "frame": 2651,
+        "frames": 600,
+        "pc": 36923,
+        "audioPeak": 0.1173095703125,
+        "name": "level_idle",
+        "spcPc": 1430
+      },
+      {
+        "seconds": 0.5421402999999998,
+        "fps": 110.6724587712812,
+        "processingP95Ms": 10.766600000000182,
+        "processingMaxMs": 11.13989999999987,
+        "includes": "Console frame, audio sampling/queue, texture upload and draw; uncapped, no display synchronization",
+        "ppuMode": 1,
+        "pixelSha256": "9aab53179a6ad0a2f50858a00dfc905e97e90b4cd8b49aa85f8da1ee3563a5c0",
+        "frame": 2711,
+        "frames": 60,
+        "pc": 36565,
+        "audioPeak": 0.128753662109375,
+        "name": "walk",
+        "spcPc": 1356
+      },
+      {
+        "seconds": 0.27876799999999946,
+        "fps": 107.616369167193,
+        "processingP95Ms": 10.395800000001287,
+        "processingMaxMs": 11.621200000000442,
+        "includes": "Console frame, audio sampling/queue, texture upload and draw; uncapped, no display synchronization",
+        "ppuMode": 1,
+        "pixelSha256": "8df8629dedd95237e59fe329a5ab055113f3d841428b77960403045e610169a8",
+        "frame": 2741,
+        "frames": 30,
+        "pc": 36637,
+        "audioPeak": 0.24151611328125,
+        "name": "jump",
+        "spcPc": 1430
+      }
+    ],
+    "directPresentation": true,
+    "window": {
+      "width": 1570,
+      "height": 1268
+    },
+    "exit": true,
+    "paced": {
+      "seconds": 15.001208599999998,
+      "includes": "Wall-paced 60 Hz core.update hook, native FixedStep, Screen:update, audio/video/draw and sleeps",
+      "fps": 59.99516598949235,
+      "processingP95Ms": 15.970899999999233,
+      "processingMaxMs": 23.131499999998084,
+      "hostHz": 144,
+      "ppuMode": 1,
+      "hostTicks": 1640,
+      "pixelSha256": "eba9acea923881d45d67ba6b0528ae50c47287bd91ad3f9f148812fa8a9366de",
+      "frame": 2951,
+      "frames": 900,
+      "fullRenderer": true,
+      "hostWorkMs": 3,
+      "pc": 36543,
+      "spcPc": 3275
+    },
+    "warmupFrames": 1,
+    "checkpoint": {
+      "pixelSha256": "d687cd6331a0674a7224e0e0f6b44329a3a4b97f0c638cf0a7a0eaac5d06e128",
+      "frame": 2051,
+      "pc": 36921,
+      "spcPc": 1441,
+      "ppuMode": 1
+    },
+    "cartridge": "SUPER MARIOWORLD"
+  },
+  "nativeEnvironment": "Windows x64 Love 11.x, Gen1Recomp 0.3.95 production loader,1570x1268;144 Hz host target plus 3 ms simulated host delay. Startup video skipped only in native preload.",
+  "accuracyReference": "angelo-wf/SnesJs@b904fdb63be15dc0470b69091622ba5b1bde7275",
+  "effectsChecks": "640 additional scanlines with all 16 mosaic sizes, pseudo-hires, main/subscreen windows, clipping, add/subtract/half color and changing palette/VRAM/brightness/window registers; asserts no slow-renderer fallback. Lua 5.1/5.4 and LuaJIT portable pixel comparison.",
+  "limitations": "Synthetic scenes and short native first-level test; no full-game, live-save enabled-mod, other-platform or hardware accuracy guarantee. Modes other than Mode 1 still use reference renderer. No frames skipped or effects disabled.",
+  "romsBundled": false
+}

@@ -90,3 +90,53 @@ for trial=1,192 do
   end
 end
 print('PASS: 768 main/subscreen scanlines match with randomized window masks, clipping and color math')
+-- Effects must stay on the batched path. Cover every mosaic size, both output
+-- widths, both math operands and raster writes after caches have warmed up.
+local fallbackCalls=0
+local effects=env.new(env.Ppu,{})
+local referenceRender=effects.renderLine
+effects.renderLine=function(p,line) fallbackCalls=fallbackCalls+1;return referenceRender(p,line) end
+include('core/fast_ppu.lua')(effects,env)
+fast=effects
+for trial=0,127 do
+  both('mode',1);both('forcedBlank',false);both('pseudoHires',trial%2==0)
+  both('mosaicSize',math.floor(trial/8)+1);both('mosaicStartLine',100)
+  both('brightness',trial%16);both('colorClip',trial%4);both('preventMath',math.floor(trial/4)%4)
+  both('addSub',trial%3~=0);both('subtractColors',trial%2==0);both('halfColors',trial%3==0)
+  both('layer3Prio',trial%3==0)
+  both('fixedColorR',rand(32));both('fixedColorG',rand(32));both('fixedColorB',rand(32))
+  both('window1Left',rand(256));both('window1Right',rand(256))
+  both('window2Left',rand(256));both('window2Right',rand(256))
+  for i=0,32767 do array('vram',i,rand(65536)) end
+  for i=0,255 do array('cgram',i,rand(32768)) end
+  for i=0,5 do
+    array('mathEnabled',i,true);array('windowMaskLogic',i,trial%4)
+    array('window1Enabled',i,true);array('window2Enabled',i,true)
+    array('window1Inversed',i,rand(2)==0);array('window2Inversed',i,rand(2)==0)
+    if i<5 then
+      array('mainScreenEnabled',i,true);array('subScreenEnabled',i,rand(2)==0)
+      array('mainScreenWindow',i,rand(2)==0);array('subScreenWindow',i,rand(2)==0)
+      array('mosaicEnabled',i,true)
+    end
+    if i<3 then
+      array('bgHoff',i,rand(1024));array('bgVoff',i,rand(1024))
+      array('bigTiles',i,rand(2)==0);array('tilemapAdr',i,rand(32)*1024)
+      array('tileAdr',i,rand(8)*4096);array('tilemapWider',i,rand(2)==0);array('tilemapHigher',i,rand(2)==0)
+    end
+  end
+  for _,line in ipairs({1,17,87,123,224}) do
+    -- Include a mosaic origin ahead of the current line (signed JS remainder),
+    -- plus an origin changed halfway through the frame by a register write.
+    if line==17 then both('mosaicStartLine',100) elseif line==123 then both('mosaicStartLine',119) end
+    both('window1Left',rand(256));both('window2Right',rand(256));both('brightness',rand(16))
+    array('windowMaskLogic',trial%6,rand(4));array('window1Inversed',trial%6,rand(2)==0)
+    array('cgram',rand(256),rand(32768));array('vram',rand(32768),rand(65536))
+    for x=0,255 do array('spriteLineBuffer',x,128+rand(128));array('spritePrioBuffer',x,rand(4)) end
+    fast:renderLine(line);reference:renderLine(line)
+    for i=line*1536,line*1536+1535 do
+      assert(fast.pixelOutput[i]==reference.pixelOutput[i],'effects mismatch trial '..trial..' line '..line..' byte '..i)
+    end
+  end
+end
+assert(fallbackCalls==0,'effects unexpectedly used slow reference path')
+print('PASS: 640 effects scanlines match reference without fallback: all mosaic sizes, pseudo-hires, clipping, math and raster writes')

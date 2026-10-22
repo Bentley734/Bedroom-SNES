@@ -20,7 +20,8 @@ def main():
         for game in ['red','blue','yellow']:
             (PROBE/'engine-test-version.txt').write_text(game)
             (saved/'result.txt').unlink(missing_ok=True)
-            result=subprocess.run([str(exe),str(PROBE)],timeout=60)
+            startup=subprocess.STARTUPINFO();startup.dwFlags |= subprocess.STARTF_USESHOWWINDOW;startup.wShowWindow=0
+            result=subprocess.run([str(exe),str(PROBE)],timeout=60,startupinfo=startup)
             log=(saved/'result.txt').read_text()
             assert 'FAIL:' not in log and 'battery save bytes survive' in log,(engine,game,log)
             checks.append({'engine':engine,'game':game,'checks':len(log.splitlines()),'passed':True})

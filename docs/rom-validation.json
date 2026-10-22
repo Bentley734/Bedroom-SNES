@@ -12,8 +12,8 @@
       "frameNumber": 420,
       "pc": 33303,
       "spcPc": 1697,
-      "seconds": 6.155680399999255,
-      "fps": 68.22966312546876,
+      "seconds": 5.544896300008986,
+      "fps": 75.74532998918652,
       "audioPeak": 0.39166259765625,
       "pixelSha256": "d32928788d9594a6efd8ed5554ff744548dd9662679068184c5a93bbc3a1a459"
     },
@@ -24,8 +24,8 @@
       "frameNumber": 1020,
       "pc": 33650,
       "spcPc": 1697,
-      "seconds": 7.516897199995583,
-      "fps": 79.82016835355319,
+      "seconds": 5.602639299992006,
+      "fps": 107.0923841199015,
       "audioPeak": 0.293701171875,
       "pixelSha256": "16cede57e94f3846d8848ffbe0c827f86f2c62b502e6c981c3bdf6b50dee7aba"
     },
@@ -36,8 +36,8 @@
       "frameNumber": 1620,
       "pc": 38285,
       "spcPc": 3886,
-      "seconds": 11.670171700010542,
-      "fps": 51.413125309840815,
+      "seconds": 11.877251700003399,
+      "fps": 50.5167369653224,
       "audioPeak": 0.266876220703125,
       "pixelSha256": "bf3def0124d9c030ff59981f6f6fc02fadd860e5c55dc44aa67d7b0689dcd2cc"
     },
@@ -48,8 +48,8 @@
       "frameNumber": 1622,
       "pc": 33650,
       "spcPc": 3342,
-      "seconds": 0.031234699999913573,
-      "fps": 64.03134974901421,
+      "seconds": 0.03176440001698211,
+      "fps": 62.963569245153245,
       "audioPeak": 0.0809326171875,
       "pixelSha256": "f2c29dc0559e7dbc10f208698c7e25d0a4752bc375d0748b3997033ffd78b1da"
     },
@@ -60,8 +60,8 @@
       "frameNumber": 1742,
       "pc": 33650,
       "spcPc": 2819,
-      "seconds": 1.6682238000212237,
-      "fps": 71.9327946277192,
+      "seconds": 1.3744953999994323,
+      "fps": 87.30476653472218,
       "audioPeak": 0.121429443359375,
       "pixelSha256": "afe6eebb2cd37377a55ae80a76cb473f09d988b52b9bf7125d4cb61f321009dd"
     },
@@ -72,8 +72,8 @@
       "frameNumber": 1744,
       "pc": 33650,
       "spcPc": 1776,
-      "seconds": 0.025915800011716783,
-      "fps": 77.17299867632026,
+      "seconds": 0.022840899997390807,
+      "fps": 87.56222391536528,
       "audioPeak": 0.09161376953125,
       "pixelSha256": "afe6eebb2cd37377a55ae80a76cb473f09d988b52b9bf7125d4cb61f321009dd"
     },
@@ -84,8 +84,8 @@
       "frameNumber": 1924,
       "pc": 33650,
       "spcPc": 1697,
-      "seconds": 3.4335465999902226,
-      "fps": 52.42392807498595,
+      "seconds": 3.56374529999448,
+      "fps": 50.50866008866537,
       "audioPeak": 0.446319580078125,
       "pixelSha256": "4265143d2b790afba01b11dfb90cfe69a3455d10570f0e3534e50d316ae0af23"
     },
@@ -96,8 +96,8 @@
       "frameNumber": 1954,
       "pc": 33650,
       "spcPc": 1697,
-      "seconds": 0.6065713000134565,
-      "fps": 49.45832418931536,
+      "seconds": 0.635156599979382,
+      "fps": 47.23244629902899,
       "audioPeak": 0.1461181640625,
       "pixelSha256": "bcc4c201ff1bfb170a8b375b4b58437c1a250f0fd074c17928d513758da9f8cf"
     },
@@ -108,8 +108,8 @@
       "frameNumber": 1984,
       "pc": 33650,
       "spcPc": 1697,
-      "seconds": 0.6070305999892298,
-      "fps": 49.42090234089068,
+      "seconds": 0.6245749000227079,
+      "fps": 48.032669899013364,
       "audioPeak": 0.1456298828125,
       "pixelSha256": "5825920dd35d6f3a77a2b5c4a928192dd86ad41c8f3f724e4e2bb438a6353c2a"
     },
@@ -120,8 +120,8 @@
       "frameNumber": 1986,
       "pc": 33650,
       "spcPc": 2815,
-      "seconds": 0.03976929999771528,
-      "fps": 50.29004785386966,
+      "seconds": 0.04036819998873398,
+      "fps": 49.54394797286387,
       "audioPeak": 0,
       "pixelSha256": "e7ad3060c2c177649aafbd3b5e1cd1523a520555743c44716cd94502fb189adf"
     },
@@ -132,8 +132,8 @@
       "frameNumber": 2166,
       "pc": 52594,
       "spcPc": 3335,
-      "seconds": 3.413398500008043,
-      "fps": 52.733368225121055,
+      "seconds": 3.5094349999853875,
+      "fps": 51.29030741436997,
       "audioPeak": 0.44354248046875,
       "pixelSha256": "0cc5f11e4d6807acffd5f9167d709d2bf1e91700460cdc33161486ce3ccc22d9"
     },
@@ -144,8 +144,8 @@
       "frameNumber": 2168,
       "pc": 52680,
       "spcPc": 2910,
-      "seconds": 0.03729680000105873,
-      "fps": 53.62390338965345,
+      "seconds": 0.04438560002017766,
+      "fps": 45.059658968016684,
       "audioPeak": 0,
       "pixelSha256": "0cc5f11e4d6807acffd5f9167d709d2bf1e91700460cdc33161486ce3ccc22d9"
     },
@@ -156,8 +156,8 @@
       "frameNumber": 2288,
       "pc": 52428,
       "spcPc": 3331,
-      "seconds": 2.45551559998421,
-      "fps": 48.869573461790125,
+      "seconds": 2.699010000011185,
+      "fps": 44.46074671805688,
       "audioPeak": 0.75,
       "pixelSha256": "423cace56461680f9be087e14f1c5a80fcc83b6eecdef36bb37822f163005129"
     },
@@ -168,8 +168,8 @@
       "frameNumber": 2318,
       "pc": 52428,
       "spcPc": 2845,
-      "seconds": 0.9232505000254605,
-      "fps": 32.49388979391042,
+      "seconds": 0.9870419999933802,
+      "fps": 30.393843423280064,
       "audioPeak": 0,
       "pixelSha256": "423cace56461680f9be087e14f1c5a80fcc83b6eecdef36bb37822f163005129"
     },
@@ -180,8 +180,8 @@
       "frameNumber": 2348,
       "pc": 52431,
       "spcPc": 2835,
-      "seconds": 0.9368518999835942,
-      "fps": 32.02213711743057,
+      "seconds": 0.9349984000145923,
+      "fps": 32.08561640269309,
       "audioPeak": 0,
       "pixelSha256": "423cace56461680f9be087e14f1c5a80fcc83b6eecdef36bb37822f163005129"
     },
@@ -192,8 +192,8 @@
       "frameNumber": 2948,
       "pc": 48875,
       "spcPc": 2910,
-      "seconds": 29.939866900007473,
-      "fps": 20.040169250046006,
+      "seconds": 18.47388440000941,
+      "fps": 32.478280528793086,
       "audioPeak": 0.75,
       "pixelSha256": "24318a275ef7eca5a13bcb3cf89e3a7a4f5fd7de9bcd48010accfa036e9d9e0c"
     },
@@ -204,8 +204,8 @@
       "frameNumber": 2978,
       "pc": 47797,
       "spcPc": 1700,
-      "seconds": 2.3376108999946155,
-      "fps": 12.833615722817301,
+      "seconds": 1.1605783000122756,
+      "fps": 25.8491822565377,
       "audioPeak": 0.348663330078125,
       "pixelSha256": "ed8024278eff8bbb7ce29f18ecbf3e38b33b44328bef5eb3b78dd670474d1d5c"
     },
@@ -216,8 +216,8 @@
       "frameNumber": 3008,
       "pc": 48472,
       "spcPc": 1697,
-      "seconds": 2.2768781000049785,
-      "fps": 13.175935944895075,
+      "seconds": 1.0738488000060897,
+      "fps": 27.936893908928212,
       "audioPeak": 0.433319091796875,
       "pixelSha256": "273fec0c80a1e4d34b89f161b2a8a342d67d1a98fff9a5a75612d5f00004e8e1"
     }
@@ -229,22 +229,50 @@
       "frame": 2948
     },
     {
+      "fps": 22.96924502311973,
       "stage": "walk",
-      "seconds": 3.123044,
-      "fps": 9.606012595403715,
       "pc": 47797,
-      "frames": 30
+      "frames": 30,
+      "seconds": 1.306094299999998
     },
     {
+      "fps": 22.1442008213284,
       "stage": "shoot",
-      "seconds": 3.0434944,
-      "fps": 9.857090586399632,
       "pc": 48472,
-      "frames": 30
+      "frames": 30,
+      "seconds": 1.3547565000000006
     },
     {
       "exit": true
     }
   ],
-  "limitations": "Local Windows x64 measurements; core benchmark uncapped. First-level gameplay remains slow. Not a full-game compatibility test."
+  "limitations": "Short local Windows x64 measurements; comparison uses recorded v0.1.0 results on this machine, not interleaved statistical benchmarking. Core uncapped. Native test includes graphics/audio and drawing, not full live gameplay. Still below full speed. Not a full-game or hardware-accuracy test.",
+  "version": "0.1.1",
+  "previousVersionNativeGraphicsAudio": {
+    "version": "0.1.0",
+    "measurements": [
+      {
+        "pc": 48875,
+        "checkpoint": "first_level",
+        "frame": 2948
+      },
+      {
+        "stage": "walk",
+        "seconds": 3.123044,
+        "fps": 9.606012595403715,
+        "pc": 47797,
+        "frames": 30
+      },
+      {
+        "stage": "shoot",
+        "seconds": 3.0434944,
+        "fps": 9.857090586399632,
+        "pc": 48472,
+        "frames": 30
+      },
+      {
+        "exit": true
+      }
+    ]
+  }
 }

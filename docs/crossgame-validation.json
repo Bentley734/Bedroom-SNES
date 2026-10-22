@@ -1,0 +1,50 @@
+{
+  "version": "0.2.5",
+  "engine": "0.3.95",
+  "testedAt": "2026-10-22T13:53:26.954619+00:00",
+  "matrix": [
+    {
+      "game": "gold",
+      "checks": 24,
+      "passed": true
+    },
+    {
+      "game": "silver",
+      "checks": 24,
+      "passed": true
+    },
+    {
+      "game": "crystal",
+      "checks": 24,
+      "passed": true
+    },
+    {
+      "game": "firered",
+      "checks": 26,
+      "passed": true
+    },
+    {
+      "game": "leafgreen",
+      "checks": 26,
+      "passed": true
+    }
+  ],
+  "locations": {
+    "gen1": {
+      "map": "REDS_HOUSE_2F",
+      "x": 3,
+      "y": 5
+    },
+    "gen2": {
+      "map": "PLAYERS_HOUSE_2F",
+      "x": 4,
+      "y": 2
+    },
+    "frlg": {
+      "map": "FR_PLAYERS_HOUSE_2F",
+      "x": 6,
+      "y": 5
+    }
+  },
+  "scope": "Production loader, actual Gen2/Gen3 interaction dispatcher and compatibility facade, fixture world/session; native graphics/audio and demo. Does not boot a user save or validate a complete Pokemon playthrough."
+}

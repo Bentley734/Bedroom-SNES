@@ -1,16 +1,16 @@
 {
   "id": "bedroom_snes",
   "name": "Bedroom SNES",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "api": 2,
   "entry": "main.lua",
   "profile": "content",
-  "games": ["red", "blue", "yellow"],
+  "games": ["red", "blue", "yellow", "gold", "silver", "crystal", "firered", "leafgreen"],
   "game_version": ">=0.3.54 <0.4.0",
   "category": "Gameplay",
   "priority": 100,
   "permissions": ["engine_internals"],
   "dependencies": [],
   "github": "Bentley734/Bedroom-SNES",
-  "description": "Play a pure-Lua SNES emulator from the console in your Pallet Town bedroom. Experimental preview with an original test cartridge; performance and game compatibility vary."
+  "description": "Play a pure-Lua SNES emulator from your bedroom console in Pallet Town or New Bark Town. Experimental preview with an original test cartridge; performance and game compatibility vary."
 }

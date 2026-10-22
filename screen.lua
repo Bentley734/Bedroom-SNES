@@ -60,7 +60,10 @@ return function(mod,include)
     self.quad=love.graphics.newQuad(0,0,512,224,512,240)
     local audioOk,source=pcall(love.audio.newQueueableSource,32040,16,2,8)
     if audioOk then self.audio=source else self.notice='Audio output is unavailable on this device.' end
-    self.musicSong=Music.current();Music.stop()
+    if self.generation==3 then
+      local Audio=require('src.core.game3.audio')
+      if not Audio._bgmPaused then Audio.pauseBgm();self.resumeBgm=true end
+    else self.musicSong=Music.current();Music.stop() end
     self.mode='playing';self.playTime=0;self.lastHostTime=love.timer.getTime();self.fpsTime=0;self.frameCount=0;self.touch={};self.dirty=true
     self.performance={windowAt=love.timer.getTime(),windowFrames=0,slowWindows=0,warmup=2}
   end
@@ -89,6 +92,7 @@ return function(mod,include)
     self:discard();self.mode='library';self.touch={};self:restoreMusic();self:refresh()
   end
   function Screen:restoreMusic()
+    if self.resumeBgm then require('src.core.game3.audio').resumeBgm();self.resumeBgm=nil end
     if self.musicSong then Music.play(self.game.data,self.musicSong);self.musicSong=nil end
   end
   function Screen:close()
@@ -99,11 +103,17 @@ return function(mod,include)
   end
   function Screen:exit()
     self:saveRam();self:discard();self:restoreMusic();self.touch={}
+    release(self.uiCanvas);self.uiCanvas=nil
     release(self.font);release(self.small);release(self.titleFont)
     if self.game.input and self.game.input.reset then self.game.input:reset() end
     if self.onClose then self.onClose() end
-    if self.returnToBedroom and self.slowSession and self.game.stack:top() then
-      self.game.stack:push(TextBox.new(self.game,"I think there's\nsomething wrong\nwith my SNES..."))
+    if self.returnToBedroom and self.slowSession then
+      if self.generation==3 then
+        local Message=require('src.ui.game3.message')
+        Message.show("I think there's something\nwrong with my SNES...",function() Message.close() end)
+      elseif self.game.stack:top() then
+        self.game.stack:push(TextBox.new(self.game,"I think there's\nsomething wrong\nwith my SNES..."))
+      end
     end
   end
   function Screen:key(key)
@@ -307,9 +317,15 @@ return function(mod,include)
   end
   function Screen:drawDirect()
     local View=require('src.render.GameViewport')
-    View.begin(1);View.setTarget()
+    View.begin(self.generation or 1);View.setTarget()
     local w,h=View.dimensions();local pw,ph=View.pixelDimensions()
-    self:present({ww=w,wh=h,pw=pw,ph=ph,dpiX=pw/w,dpiY=ph/h})
+    local ctx={ww=w,wh=h,pw=pw,ph=ph,dpiX=pw/w,dpiY=ph/h}
+    if not self.image or self.mode=='library' or self.mode=='instructions' then
+      if not self.uiCanvas then self.uiCanvas=love.graphics.newCanvas(W,H);self.uiCanvas:setFilter('nearest','nearest') end
+      love.graphics.setCanvas(self.uiCanvas);love.graphics.clear(0,0,0,1);self:draw()
+      View.setTarget();ctx.uiCanvas=self.uiCanvas
+    end
+    self:present(ctx)
     View.finish(self.game)
     return true
   end
@@ -356,7 +372,7 @@ return function(mod,include)
       text(self.font,'Play cartridge  /  Enter or A',22,226)
       text(self.small,'Back to cartridges  /  Escape or B',22,258,'muted')
     elseif self.mode=='library' then
-      text(self.small,'PALLET TOWN / PLAYER BEDROOM',16,12,'mint')
+      text(self.small,self.generation==2 and 'NEW BARK TOWN / PLAYER BEDROOM' or 'PALLET TOWN / PLAYER BEDROOM',16,12,'mint')
       text(self.titleFont,'Bedroom SNES',16,28);text(self.small,'EXIT',285,14,'muted')
       text(self.small,'CARTRIDGES',16,66,'muted')
       local first=math.max(1,self.index-3)

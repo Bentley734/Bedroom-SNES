@@ -1,17 +1,17 @@
 # Bedroom SNES
 
-A **pure-Lua SNES emulator inside Gen1Recomp**, opened by interacting with the SNES in the player's upstairs bedroom in Pallet Town. Supports Pokémon Red, Blue, and Yellow.
+A **pure-Lua SNES emulator inside Gen1Recomp**, opened by interacting with the console in the player's upstairs bedroom. Supports Pokémon Red, Blue, Yellow, Gold, Silver, Crystal, FireRed and LeafGreen.
 
-**v0.2.4 is an experimental preview.** The included original homebrew cartridge boots and responds to controls. Speed and game compatibility vary; this is not a full-speed, broadly compatible replacement for a standalone emulator. No commercial SNES ROMs are included.
+**v0.2.5 is an experimental preview.** The included original homebrew cartridge boots and responds to controls. Speed and game compatibility vary; this is not a full-speed, broadly compatible replacement for a standalone emulator. No commercial SNES ROMs are included.
 
 ![Bedroom SNES cartridge menu](docs/library.png)
 ![Original homebrew running inside the emulator](docs/playing.png)
 
 ## Install and play
 
-1. Download `Bedroom-SNES-v0.2.4.zip` from [Releases](https://github.com/Bentley734/Bedroom-SNES/releases/latest).
-2. Import it using Gen1Recomp's mod manager and enable **Bedroom SNES** for Red, Blue, or Yellow. Gen1Recomp **0.3.54 or newer** is required; native loader/graphics tests cover 0.3.54 and 0.3.95.
-3. Go upstairs in the player's house in Pallet Town and interact with the SNES. Select **bedroom-demo** to try the included cartridge.
+1. Download `Bedroom-SNES-v0.2.5.zip` from [Releases](https://github.com/Bentley734/Bedroom-SNES/releases/latest).
+2. Import it using Gen1Recomp's mod manager and enable **Bedroom SNES** for the game you want to play. Gen1Recomp **0.3.54 or newer** is required; Red/Blue/Yellow native loader/graphics tests cover 0.3.54 and 0.3.95; the five added games are tested on 0.3.95 and need its cross-generation compatibility hooks.
+3. Go upstairs in the player's house and interact with the console: **Pallet Town** in Red/Blue/Yellow and FireRed/LeafGreen, or **New Bark Town** in Gold/Silver/Crystal. G/S/C needs a console decoration placed in the room. Select **bedroom-demo** to try the included cartridge.
 4. Read the exit instructions shown **before every cartridge launch**, release the launch button, then confirm to play.
 5. Press **Backspace** to return straight to the bedroom, or **Escape/P** to open the pause menu. Controller pause and exit controls also work.
 
@@ -119,3 +119,11 @@ Validation adds **2,816** byte-for-byte all-mode scanline comparisons, **320** r
 Synthetic PPU-only benchmarks show roughly **1.5x** throughput for ordinary Mode 0 and **2.3x** for Mode 3; the other ordinary modes range from approximately unchanged to **1.4x**. The combined raster-window/mosaic/blend fixtures improve much more because they previously hit especially slow reference paths. These deliberately demanding synthetic cases are not whole-game or live-save FPS measurements. See `docs/modes-validation.json` for all measurements and limitations.
 
 Output is checked against SnesJs, not physical SNES hardware. Its approximate timing, Mode 7/scrolling edge cases, single-field interlace presentation and missing DSP echo remain. No frames or effects are skipped, and Super FX cartridges such as Yoshi's Island remain unsupported.
+
+## v0.2.5 additional Pokemon games
+
+The same mod now supports all eight listed games. Interact with the bedroom console at `REDS_HOUSE_2F` (3,5) in R/B/Y, `PLAYERS_HOUSE_2F` (4,2) in G/S/C, or `FR_PLAYERS_HOUSE_2F` (6,5) in FR/LG. Coordinates identify the object being faced. G/S/C respects the existing console-decoration object: putting the console away leaves the tile inactive. Other bedroom objects and the same coordinates in other rooms keep their normal interactions.
+
+Gen 2/3 use the engine's compatibility interaction seams. Busy scripts/dialogues and moving players cannot open the emulator. The Game3 field is suspended while a private SNES state stack owns input; closing restores the original host stack property and draw function. FR/LG use native BGM pause/resume and their own dialogue UI. All added games draw menus and cartridges directly in full color, with nearest-neighbor integer scaling and the same exit instructions. A save failure keeps the emulator open; quitting to the launcher also cleans up its state and controls.
+
+Native production-loader fixtures exercise all five additions on Gen1Recomp 0.3.95, including actual interaction dispatch, launch, draw, audio, save, input, exit/reentry and slow-session dialogue. They do not boot a user's Pokemon save or establish full-playthrough compatibility. See `docs/crossgame-validation.json`. Red/Blue/Yellow's 282 native checks and the complete emulator regression suites also pass. Cartridge SRAM stays scoped by Pokemon version and playthrough; the emulator core is unchanged from v0.2.4.
